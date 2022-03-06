@@ -60,7 +60,7 @@ x-airflow-common:
     GOOGLE_APPLICATION_CREDENTIALS: /.google/credentials/google_credentials.json
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/.google/credentials/google_credentials.json'
     GCP_PROJECT_ID: 'data-eng-zoomcamp-339102'
-    GCP_GCS_BUCKET: "dtc_data_lake_data-eng-zoomcamp-339102"
+    GCP_GCS_BUCKET: "energy_project_bucket_data-eng-zoomcamp-339102 "
 
   volumes:
     - ./dags:/opt/airflow/dags
