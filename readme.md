@@ -17,7 +17,7 @@ This is the repo for my capstone project for the Data Engineering Zoomcamp from 
 
 🔲 Ingest raw data into the data lake with Airflow on a proper schedule
 
-🔲 Transform and Load Data into BW DW
+🔲 Transform and Load Data into BQ DW
 
 🔲 Perform additional transformations as needed in the DW with dbt to create analytics layer
 
