@@ -11,3 +11,4 @@
 .history
 *.csv
 .ipynb_checkpoints/
+*.bin
