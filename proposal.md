@@ -39,5 +39,5 @@ Multiple data sources of varying types will feed the pipeline.
 
 ![](img/pipeline.png)
 
-## Dashboard Idea
+## Dashboard Concept
 ![](img/dashboard_mockup.png)
