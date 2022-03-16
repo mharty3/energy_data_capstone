@@ -39,13 +39,13 @@ The initial motivation for the project was to fulfil the capstone project requir
 
 
 ## Tasks
-🔲 Find data sources and explore them in notebooks
+✅ Find data sources and explore them in notebooks
 
     ✅ Hourly Energy Demand Data - US EIA
 
     ✅ Hourly Historical Weather Data - US NOAA
 
-    🔲 Weather Forecast Data - US NOAA
+    ✅ Weather Forecast Data - US NOAA
 
 ✅ Create GCS Bucket with Terraform to serve as the data lake
 
