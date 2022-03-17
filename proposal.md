@@ -14,7 +14,7 @@ This project will create the necessary data engineering infrastructure (an "end-
 
 Loading historical demand data along with historical temperature records will allow data scientists to develop reliable demand forecasts. I will also load the existing demand forecast from the EIA for baseline comparisons.
 
-Accurately forecasting energy demand is critical for electrical grid operators. Without significant power storage options, electricity must be used at the time it is generated. Balancing authorities must have an accurate power demand forecast in order to successfully plan generation and interchange over the upcoming day(s). As the shift to renewables accelerates, this will only become more important as renewables are often more intermittent than traditional generation sources.of power.
+Accurately forecasting energy demand is critical for electrical grid operators. Without significant power storage options, electricity must be used at the time it is generated. Balancing authorities must have an accurate power demand forecast in order to successfully plan generation and interchange over the upcoming day(s). As the shift to renewables accelerates, this will only become more important because renewables are often more intermittent than traditional generation sources.of power.
 
 ## Technologies 
 
