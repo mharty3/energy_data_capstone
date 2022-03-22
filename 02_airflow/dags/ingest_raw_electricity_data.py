@@ -22,8 +22,9 @@ AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 EIA_DATE = "{{ execution_date.strftime(\'%Y%m%d\') }}" # 20220314
 YEAR = "{{ execution_date.strftime(\'%Y\') }}"
 MONTH = "{{ execution_date.strftime(\'%m\') }}"
-DATASET_FILE_PREFIX = "psco_demand_"
-DATASET_FILE_TEMPLATE = DATASET_FILE_PREFIX + "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}.json" 
+
+LOCAL_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}.json"
+REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}.json" 
 
 series_list = [
     'EBA.PSCO-ALL.D.H' # Public Service Company of Colorado in UTC 
@@ -41,8 +42,10 @@ def extract_energy_demand(series_id, date, outfile):
 
     r = requests.get(url, params)
 
+
     with open(outfile, 'w') as f:
         json.dump(r.json(), f)
+    logging.info(f'file written to {outfile}')
 
 
 def upload_to_gcs(bucket, object_name, local_file):
@@ -68,8 +71,7 @@ def upload_to_gcs(bucket, object_name, local_file):
 
 default_args = {
     "owner": "airflow",
-    "start_date": datetime(2022, 1, 1),
-    "depends_on_past": True,
+    "depends_on_past": False,
     "retries": 1,
 }
 
@@ -84,13 +86,15 @@ with DAG(
     dag_id="raw_electricity_ingestion_dag",
     schedule_interval="@hourly",
     default_args=default_args,
-    start_date=datetime(2022, 2, 1),
+    start_date=datetime(2022, 2, 25),
     catchup=True,
-    max_active_runs=3,
+    max_active_runs=5,
     tags=['dtc-de'],
 ) as dag:
 
     for series_id in series_list:
+        local_file_name = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
+        remote_file_name = f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
 
         download_dataset_task = PythonOperator(
             task_id=f"download_{series_id}_dataset_task",
@@ -98,7 +102,7 @@ with DAG(
             op_kwargs={
                 "series_id": series_id,
                 "date": EIA_DATE,
-                "outfile": f"{AIRFLOW_HOME}/{DATASET_FILE_TEMPLATE}"
+                "outfile": f"{AIRFLOW_HOME}/{local_file_name}"
             },
         )
 
@@ -107,14 +111,14 @@ with DAG(
             python_callable=upload_to_gcs,
             op_kwargs={
                 "bucket": BUCKET,
-                "object_name": f"raw/eia/{series_id}/{YEAR}/{MONTH}/{DATASET_FILE_TEMPLATE}",
-                "local_file": f"{AIRFLOW_HOME}/{DATASET_FILE_TEMPLATE}",
+                "object_name": f"raw/eia/{series_id}/{YEAR}/{MONTH}/{remote_file_name}",
+                "local_file": f"{AIRFLOW_HOME}/{local_file_name}",
             }
         )
 
         cleanup_task = BashOperator(
             task_id=f"cleanup_{series_id}_task",
-            bash_command=f'rm {AIRFLOW_HOME}/{DATASET_FILE_TEMPLATE}'
+            bash_command=f'rm {AIRFLOW_HOME}/{local_file_name}'
         )    
             
 
