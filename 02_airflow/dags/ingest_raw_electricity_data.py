@@ -46,21 +46,20 @@ def download_energy_demand_json(series_id, outfile):
 
 
 def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
-    # download_from_GCS(BUCKET, 
-    #                   f'raw/eia/{series_id}_{REMOTE_DATASET_FILE_SUFFIX}',
-    #                   f"{AIRFLOW_HOME}/{series_id}_{LOCAL_DATASET_FILE_SUFFIX}")
 
     with open(f"{AIRFLOW_HOME}/{local_file_name}") as f:
         j = json.load(f)
     
     # extract metadata table from json
     metadata = pd.DataFrame((j['series'][0])).loc[[0], :].drop('data', axis=1)
+    metadata['series_id'] = metadata['series_id'].replace('.', '_')
     
     # extract data series 
     data = j['series'][0]['data']
     data_df = (pd.DataFrame(data, columns=['timestamp', series_id])
                 .assign(timestamp=lambda df_:pd.to_datetime(df_['timestamp']))
               )
+    data_df.columns = data_df.columns.str.replace('.', '_')
     
     metadata.to_parquet(f'{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet')
     data_df.to_parquet(f'{AIRFLOW_HOME}/data_{local_file_suffix}.parquet')
