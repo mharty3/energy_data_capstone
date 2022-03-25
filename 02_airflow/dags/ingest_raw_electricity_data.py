@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 from datetime import date, datetime
+import pandas as pd
 
 from airflow import DAG
 from airflow.utils.dates import days_ago
@@ -19,15 +20,11 @@ BUCKET = os.environ.get("GCP_GCS_BUCKET")
 EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
-# EIA_DATE = "{{ execution_date.strftime(\'%Y%m%d\') }}" # 20220314
-# YEAR = "{{ execution_date.strftime(\'%Y\') }}"
-# MONTH = "{{ execution_date.strftime(\'%m\') }}"
-
-LOCAL_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}.json"
-REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}.json" 
+LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
+REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
 
 
-def extract_energy_demand(series_id, outfile):
+def download_energy_demand_json(series_id, outfile):
     url = 'https://api.eia.gov/series/'
     
     params = {'api_key': EIA_API_KEY,
@@ -35,11 +32,70 @@ def extract_energy_demand(series_id, outfile):
              }
 
     r = requests.get(url, params)
+    logging.info("requesting data from EIA API")
+
+    if r.status_code == 200:
+        logging.info(r.status_code)
+
+        with open(outfile, 'w') as f:
+            json.dump(r.json(), f)
+        logging.info(f'file written to {outfile}')
+    
+    else:
+        logging.info(r.status_code)
 
 
-    with open(outfile, 'w') as f:
-        json.dump(r.json(), f)
-    logging.info(f'file written to {outfile}')
+def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
+    # download_from_GCS(BUCKET, 
+    #                   f'raw/eia/{series_id}_{REMOTE_DATASET_FILE_SUFFIX}',
+    #                   f"{AIRFLOW_HOME}/{series_id}_{LOCAL_DATASET_FILE_SUFFIX}")
+
+    with open(f"{AIRFLOW_HOME}/{local_file_name}") as f:
+        j = json.load(f)
+    
+    # extract metadata table from json
+    metadata = pd.DataFrame((j['series'][0])).loc[[0], :].drop('data', axis=1)
+    
+    # extract data series 
+    data = j['series'][0]['data']
+    data_df = (pd.DataFrame(data, columns=['timestamp', series_id])
+                .assign(timestamp=lambda df_:pd.to_datetime(df_['timestamp']))
+              )
+    
+    metadata.to_parquet(f'{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet')
+    data_df.to_parquet(f'{AIRFLOW_HOME}/data_{local_file_suffix}.parquet')
+
+    logging.info('files converted to parquet')
+
+
+
+def download_from_GCS(bucket, object, local_file_dest):
+    """Downloads a blob from the bucket."""
+    # The ID of your GCS bucket
+    # bucket = "your-bucket-name"
+
+    # The ID of your GCS object
+    # source_blob_name = "storage-object-name"
+
+    # The path to which the file should be downloaded
+    # destination_file_name = "local/path/to/file"
+
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket)
+
+    # Construct a client side representation of a blob.
+    # Note `Bucket.blob` differs from `Bucket.get_blob` as it doesn't retrieve
+    # any content from Google Cloud Storage. As we don't need additional data,
+    # using `Bucket.blob` is preferred here.
+    blob = bucket.blob()
+    blob.download_to_filename(local_file_dest)
+
+    logging.info(
+        "Downloaded storage object {} from bucket {} to local file {}.".format(
+            object, bucket, local_file_dest
+        )
+    )
 
 
 def upload_to_gcs(bucket, object_name, local_file):
@@ -61,6 +117,29 @@ def upload_to_gcs(bucket, object_name, local_file):
 
     blob = bucket.blob(object_name)
     blob.upload_from_filename(local_file)
+
+
+def upload_multiple_files_to_gcs(bucket, object_names, local_files):
+    """
+    Ref: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python
+    :param bucket: GCS bucket name
+    :param object_name: target path & file-name
+    :param local_file: source path & file-name
+    :return:
+    """
+    # WORKAROUND to prevent timeout for files > 6 MB on 800 kbps upload speed.
+    # (Ref: https://github.com/googleapis/python-storage/issues/74)
+    storage.blob._MAX_MULTIPART_SIZE = 5 * 1024 * 1024  # 5 MB
+    storage.blob._DEFAULT_CHUNKSIZE = 5 * 1024 * 1024  # 5 MB
+
+    if not type(object_names) == list and not type(local_files) == list:
+        raise TypeError('object_names and local_files must be lists')
+    if not len(object_names) == len(local_files):
+        raise ValueError('object_names and local_files must be the same length')
+
+    for remote, local in zip(object_names, local_files):
+        upload_to_gcs(bucket, remote, local)
+        logging.info(f'uploaded {local} to {bucket}/{remote}')
 
 
 default_args = {
@@ -87,32 +166,54 @@ with DAG(
 ) as dag:
 
     for series_id in series_list:
-        local_file_name = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
-        remote_file_name = f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
+        local_file_suffix = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
+        remote_file_suffix= f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
 
         download_dataset_task = PythonOperator(
             task_id=f"download_{series_id}_dataset_task",
-            python_callable=extract_energy_demand,
+            python_callable=download_energy_demand_json,
             op_kwargs={
                 "series_id": series_id,
-                "outfile": f"{AIRFLOW_HOME}/{local_file_name}"
+                "outfile": f"{AIRFLOW_HOME}/{local_file_suffix}.json"
             },
         )
 
-        local_to_gcs_task = PythonOperator(
-            task_id=f"local_to_gcs_{series_id}_task",
+        local_raw_to_gcs_task = PythonOperator(
+            task_id=f"local_raw_to_gcs_{series_id}_task",
             python_callable=upload_to_gcs,
             op_kwargs={
                 "bucket": BUCKET,
-                "object_name": f"raw/eia/{series_id}/{remote_file_name}",
-                "local_file": f"{AIRFLOW_HOME}/{local_file_name}",
+                "object_name": f"raw/eia/{series_id}/{remote_file_suffix}.json",
+                "local_file": f"{AIRFLOW_HOME}/{local_file_suffix}.json",
+            }
+        )
+        
+        extract_data_task = PythonOperator(
+            task_id=f"extract_eia_series_data_task_{series_id}",
+            python_callable=extract_energy_demand_data,
+            op_kwargs={
+                "series_id": series_id,
+                "local_file_name": f"{local_file_suffix}.json",
+                "local_file_suffix": local_file_suffix
+            }
+        )
+
+        local_extracted_to_gcs_task = PythonOperator(
+            task_id=f'local_extracted_to_gcs_{series_id}_task',
+            python_callable = upload_multiple_files_to_gcs,
+            op_kwargs={
+                'bucket': BUCKET,
+                'object_names': [f"staged/eia/{series_id}/data/{remote_file_suffix}.parquet",
+                                 f"staged/eia/{series_id}/metadata/{remote_file_suffix}.parquet"],
+                'local_files': [f"{AIRFLOW_HOME}/data_{local_file_suffix}.parquet", 
+                                f"{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet"]
             }
         )
 
         cleanup_task = BashOperator(
             task_id=f"cleanup_{series_id}_task",
-            bash_command=f'rm {AIRFLOW_HOME}/{local_file_name}'
+            bash_command=f'rm {AIRFLOW_HOME}/{local_file_suffix}.json {AIRFLOW_HOME}/data_{local_file_suffix}.parquet {AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet'
         )    
             
 
-        download_dataset_task >> local_to_gcs_task >> cleanup_task
+        download_dataset_task >> local_raw_to_gcs_task >> extract_data_task >> local_extracted_to_gcs_task >> cleanup_task

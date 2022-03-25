@@ -6,6 +6,7 @@ USER root
 RUN apt-get update -qq && apt-get install vim -qqq
 
 COPY requirements.txt .
+RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # https://airflow.apache.org/docs/docker-stack/recipes.html
