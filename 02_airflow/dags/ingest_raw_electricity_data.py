@@ -19,25 +19,19 @@ BUCKET = os.environ.get("GCP_GCS_BUCKET")
 EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
-EIA_DATE = "{{ execution_date.strftime(\'%Y%m%d\') }}" # 20220314
-YEAR = "{{ execution_date.strftime(\'%Y\') }}"
-MONTH = "{{ execution_date.strftime(\'%m\') }}"
+# EIA_DATE = "{{ execution_date.strftime(\'%Y%m%d\') }}" # 20220314
+# YEAR = "{{ execution_date.strftime(\'%Y\') }}"
+# MONTH = "{{ execution_date.strftime(\'%m\') }}"
 
 LOCAL_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}.json"
 REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}.json" 
 
-series_list = [
-    'EBA.PSCO-ALL.D.H' # Public Service Company of Colorado in UTC 
-]
 
-
-def extract_energy_demand(series_id, date, outfile):
+def extract_energy_demand(series_id, outfile):
     url = 'https://api.eia.gov/series/'
     
     params = {'api_key': EIA_API_KEY,
              'series_id': series_id,
-             'start': date,
-             'end': date
              }
 
     r = requests.get(url, params)
@@ -86,10 +80,10 @@ with DAG(
     dag_id="raw_electricity_ingestion_dag",
     schedule_interval="@hourly",
     default_args=default_args,
-    start_date=datetime(2022, 2, 25),
+    start_date=datetime(2022, 3, 25),
     catchup=True,
     max_active_runs=5,
-    tags=['dtc-de'],
+    tags=['dtc-de', 'eia'],
 ) as dag:
 
     for series_id in series_list:
@@ -101,7 +95,6 @@ with DAG(
             python_callable=extract_energy_demand,
             op_kwargs={
                 "series_id": series_id,
-                "date": EIA_DATE,
                 "outfile": f"{AIRFLOW_HOME}/{local_file_name}"
             },
         )
@@ -111,7 +104,7 @@ with DAG(
             python_callable=upload_to_gcs,
             op_kwargs={
                 "bucket": BUCKET,
-                "object_name": f"raw/eia/{series_id}/{YEAR}/{MONTH}/{remote_file_name}",
+                "object_name": f"raw/eia/{series_id}/{remote_file_name}",
                 "local_file": f"{AIRFLOW_HOME}/{local_file_name}",
             }
         )
