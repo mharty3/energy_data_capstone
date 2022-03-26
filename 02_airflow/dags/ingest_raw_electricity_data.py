@@ -9,14 +9,16 @@ from airflow import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
+from airflow.utils.task_group import TaskGroup
 
 from google.cloud import storage
-# from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator
 # import pyarrow.csv as pv
 # import pyarrow.parquet as pq
 
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
+BIGQUERY_DATASET = 'energy_data'
 EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
@@ -153,7 +155,6 @@ series_list = [
     'EBA.PSCO-ALL.DF.H' # Day-ahead demand forecast for Public Service Company of Colorado (PSCO), hourly - UTC time
 ]
 
-
 with DAG(
     dag_id="raw_electricity_ingestion_dag",
     schedule_interval="@hourly",
@@ -163,56 +164,76 @@ with DAG(
     max_active_runs=5,
     tags=['dtc-de', 'eia'],
 ) as dag:
+    with TaskGroup(group_id='download_and_extract') as dl_and_extract_tg:
+        for series_id in series_list:
+            local_file_suffix = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
+            remote_file_suffix= f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
 
-    for series_id in series_list:
-        local_file_suffix = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
-        remote_file_suffix= f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
+            download_dataset_task = PythonOperator(
+                task_id=f"download_{series_id}_dataset_task",
+                python_callable=download_energy_demand_json,
+                op_kwargs={
+                    "series_id": series_id,
+                    "outfile": f"{AIRFLOW_HOME}/{local_file_suffix}.json"
+                },
+            )
 
-        download_dataset_task = PythonOperator(
-            task_id=f"download_{series_id}_dataset_task",
-            python_callable=download_energy_demand_json,
-            op_kwargs={
-                "series_id": series_id,
-                "outfile": f"{AIRFLOW_HOME}/{local_file_suffix}.json"
-            },
-        )
-
-        local_raw_to_gcs_task = PythonOperator(
-            task_id=f"local_raw_to_gcs_{series_id}_task",
-            python_callable=upload_to_gcs,
-            op_kwargs={
-                "bucket": BUCKET,
-                "object_name": f"raw/eia/{series_id}/{remote_file_suffix}.json",
-                "local_file": f"{AIRFLOW_HOME}/{local_file_suffix}.json",
-            }
-        )
-        
-        extract_data_task = PythonOperator(
-            task_id=f"extract_eia_series_data_task_{series_id}",
-            python_callable=extract_energy_demand_data,
-            op_kwargs={
-                "series_id": series_id,
-                "local_file_name": f"{local_file_suffix}.json",
-                "local_file_suffix": local_file_suffix
-            }
-        )
-
-        local_extracted_to_gcs_task = PythonOperator(
-            task_id=f'local_extracted_to_gcs_{series_id}_task',
-            python_callable = upload_multiple_files_to_gcs,
-            op_kwargs={
-                'bucket': BUCKET,
-                'object_names': [f"staged/eia/{series_id}/data/{remote_file_suffix}.parquet",
-                                 f"staged/eia/{series_id}/metadata/{remote_file_suffix}.parquet"],
-                'local_files': [f"{AIRFLOW_HOME}/data_{local_file_suffix}.parquet", 
-                                f"{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet"]
-            }
-        )
-
-        cleanup_task = BashOperator(
-            task_id=f"cleanup_{series_id}_task",
-            bash_command=f'rm {AIRFLOW_HOME}/{local_file_suffix}.json {AIRFLOW_HOME}/data_{local_file_suffix}.parquet {AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet'
-        )    
+            local_raw_to_gcs_task = PythonOperator(
+                task_id=f"local_raw_to_gcs_{series_id}_task",
+                python_callable=upload_to_gcs,
+                op_kwargs={
+                    "bucket": BUCKET,
+                    "object_name": f"raw/eia/{series_id}/{remote_file_suffix}.json",
+                    "local_file": f"{AIRFLOW_HOME}/{local_file_suffix}.json",
+                }
+            )
             
+            extract_data_task = PythonOperator(
+                task_id=f"extract_eia_series_data_task_{series_id}",
+                python_callable=extract_energy_demand_data,
+                op_kwargs={
+                    "series_id": series_id,
+                    "local_file_name": f"{local_file_suffix}.json",
+                    "local_file_suffix": local_file_suffix
+                }
+            )
 
-        download_dataset_task >> local_raw_to_gcs_task >> extract_data_task >> local_extracted_to_gcs_task >> cleanup_task
+            local_extracted_to_gcs_task = PythonOperator(
+                task_id=f'local_extracted_to_gcs_{series_id}_task',
+                python_callable = upload_multiple_files_to_gcs,
+                op_kwargs={
+                    'bucket': BUCKET,
+                    'object_names': [f"staged/eia/data/{series_id}_{remote_file_suffix}.parquet",
+                                    f"staged/eia/metadata/{series_id}_{remote_file_suffix}.parquet"],
+                    'local_files': [f"{AIRFLOW_HOME}/data_{local_file_suffix}.parquet", 
+                                    f"{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet"]
+                }
+            )
+
+
+            cleanup_task = BashOperator(
+                task_id=f"cleanup_{series_id}_task",
+                bash_command=f'rm {AIRFLOW_HOME}/{local_file_suffix}.json {AIRFLOW_HOME}/data_{local_file_suffix}.parquet {AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet'
+            )    
+
+            download_dataset_task >> local_raw_to_gcs_task >> extract_data_task >> local_extracted_to_gcs_task >> cleanup_task
+    
+    gcs_to_bq_ext_task = BigQueryCreateExternalTableOperator(
+        task_id=f"gcs_to_bq_ext_eia_series_metadata_task",
+        trigger_rule='all_done',
+        table_resource={
+            "tableReference": {
+                "projectId": PROJECT_ID,
+                "datasetId": BIGQUERY_DATASET,
+                "tableId": f"external_eia_series_metadata_tripdata",
+            },
+            "externalDataConfiguration": {
+                "sourceFormat": "PARQUET",
+                "sourceUris": [f"gs://{BUCKET}/staged/eia/metadata/*"],
+            },
+        },
+    )
+
+    dl_and_extract_tg >> gcs_to_bq_ext_task
+    
+    
