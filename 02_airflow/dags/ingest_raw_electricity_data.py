@@ -1,9 +1,12 @@
 import os
 import json
 import logging
+import decimal
 import requests
 from datetime import date, datetime
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from airflow import DAG
 from airflow.utils.dates import days_ago
@@ -12,7 +15,7 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 
 from google.cloud import storage
-from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator, BigQueryInsertJobOperator
 # import pyarrow.csv as pv
 # import pyarrow.parquet as pq
 
@@ -54,17 +57,26 @@ def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
     
     # extract metadata table from json
     metadata = pd.DataFrame((j['series'][0])).loc[[0], :].drop('data', axis=1)
-    metadata['series_id'] = metadata['series_id'].replace('.', '_')
+    metadata['series_id'] = metadata['series_id'].str.replace('.', '_')
     
     # extract data series 
     data = j['series'][0]['data']
-    data_df = (pd.DataFrame(data, columns=['timestamp', series_id])
-                .assign(timestamp=lambda df_:pd.to_datetime(df_['timestamp']))
+    data_df = (pd.DataFrame(data, columns=['timestamp', 'value'])
+                .assign(timestamp=lambda df_:pd.to_datetime(df_['timestamp']),
+                        series_id=series_id.replace('.', '_'))
               )
     data_df.columns = data_df.columns.str.replace('.', '_')
-    
+
+    fields = [
+    ('timestamp', pa.timestamp(unit='ns')),
+    ('value', pa.float64()),
+    ('series_id', pa.string()),
+    ]
+    schema = pa.schema(fields)
+    table = pa.Table.from_pandas(data_df, schema=schema)
+   
+    pq.write_table(table, f'{AIRFLOW_HOME}/data_{local_file_suffix}.parquet')
     metadata.to_parquet(f'{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet')
-    data_df.to_parquet(f'{AIRFLOW_HOME}/data_{local_file_suffix}.parquet')
 
     logging.info('files converted to parquet')
 
@@ -218,22 +230,46 @@ with DAG(
 
             download_dataset_task >> local_raw_to_gcs_task >> extract_data_task >> local_extracted_to_gcs_task >> cleanup_task
     
-    gcs_to_bq_ext_task = BigQueryCreateExternalTableOperator(
-        task_id=f"gcs_to_bq_ext_eia_series_metadata_task",
-        trigger_rule='all_done',
-        table_resource={
-            "tableReference": {
-                "projectId": PROJECT_ID,
-                "datasetId": BIGQUERY_DATASET,
-                "tableId": f"external_eia_series_metadata_tripdata",
-            },
-            "externalDataConfiguration": {
-                "sourceFormat": "PARQUET",
-                "sourceUris": [f"gs://{BUCKET}/staged/eia/metadata/*"],
-            },
-        },
-    )
+    with TaskGroup(group_id='load_to_bq') as load_to_bq_tg:
+        bucket_subfolders = ['data', 'metadata']
+        external_table_names = ['demand_data_external', 'demand_metadata_external']
+        native_table_names = ['demand_data_native', 'demand_metadata_native']
 
-    dl_and_extract_tg >> gcs_to_bq_ext_task
+        for bucket_subfolder, external_table, native_table in zip(bucket_subfolders, 
+                                                                  external_table_names, 
+                                                                  native_table_names):
+
+            gcs_to_bq_ext_task = BigQueryCreateExternalTableOperator(
+                task_id=f"gcs_to_bq_ext_eia_series_{bucket_subfolder}_task",
+                table_resource={
+                    "tableReference": {
+                        "projectId": PROJECT_ID,
+                        "datasetId": BIGQUERY_DATASET,
+                        "tableId": external_table,
+                    },
+                    "externalDataConfiguration": {
+                        "sourceFormat": "PARQUET",
+                        "sourceUris": [f"gs://{BUCKET}/staged/eia/{bucket_subfolder}/*"],
+                    },
+                },
+            )
+            
+            CREATE_NATIVE_TABLE_QUERY = f"""CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{native_table}
+                                            AS SELECT * FROM {BIGQUERY_DATASET}.{external_table};"""
+
+            create_native_bq_table_task = BigQueryInsertJobOperator(
+                task_id=f"bq_ext_to_native_{bucket_subfolder}_task",
+                configuration={
+                    "query": {
+                        "query": CREATE_NATIVE_TABLE_QUERY,
+                        "useLegacySql": False,
+                    }
+                },
+            )
+
+            gcs_to_bq_ext_task >> create_native_bq_table_task
+    
+
+    dl_and_extract_tg >> load_to_bq_tg
     
     
