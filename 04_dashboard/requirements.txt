@@ -1,4 +1,6 @@
 google-cloud-bigquery
+streamlit
 pandas
 pandas_gbq
 plotly
+click==7.1.2
