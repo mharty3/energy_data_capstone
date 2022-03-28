@@ -34,39 +34,48 @@ def run_query(query):
     # rows = [dict(row) for row in rows_raw]
     return pd.read_gbq(query, project_id=PROJECT_ID, credentials=credentials)
 
-TODAY = date.today()
-TOMORROW = TODAY + timedelta(2)
-WEEK_PRIOR = TODAY - timedelta(7)
-with st.form('date_picker'):
-    start_date, end_date = st.date_input('Select Data Date Range', value=(WEEK_PRIOR, TOMORROW))
-    submitted = st.form_submit_button("Update")
 
-
-historical_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
-forecast_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
-
-
-fig = px.line(
+def plot_demand_time_series(forecast_demand, actual_demand):
+    fig = px.line(
             forecast_demand, 
             x='timestamp', 
             y='value',
             title="Actual and Forecasted Electrical Demand, Xcel Energy, CO",
             labels={'value': 'Demand (megawatthours)'}
 
-)
-
-fig.add_traces(
-    list(px.line(historical_demand, x='timestamp', y='value', labels='Actual_Demand (megawatthours)').select_traces())
     )
 
-fig['data'][1]['line']['color']='#ef476f'
-fig['data'][1]['line']['width']=5
+    fig.add_traces(
+        list(px.line(actual_demand, x='timestamp', y='value', labels='Actual_Demand (megawatthours)').select_traces())
+        )
+
+    fig['data'][1]['line']['color']='#ef476f'
+    fig['data'][1]['line']['width']=5
     fig['data'][0]['line']['color']='#06d6a0'
     fig['data'][0]['line']['width']=2
 
-fig['data'][1]['showlegend']=True
-fig['data'][1]['name']='Actual Demand'
-fig['data'][0]['showlegend']=True
-fig['data'][0]['name']='EIA Demand Forecast'
+    fig['data'][1]['showlegend']=True
+    fig['data'][1]['name']='Actual Demand'
+    fig['data'][0]['showlegend']=True
+    fig['data'][0]['name']='EIA Demand Forecast'
 
-st.plotly_chart(fig, use_container_width=True)
+    return fig
+
+def main():
+    TODAY = date.today()
+    TOMORROW = TODAY + timedelta(2)
+    WEEK_PRIOR = TODAY - timedelta(7)
+    with st.form('date_picker'):
+        start_date, end_date = st.date_input('Select Data Date Range', value=(WEEK_PRIOR, TOMORROW))
+        submitted = st.form_submit_button("Update")
+
+
+    actual_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
+    forecast_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
+
+
+    fig = plot_demand_time_series(forecast_demand, actual_demand)
+    st.plotly_chart(fig, use_container_width=True)
+
+if __name__ == '__main__':
+    main()
