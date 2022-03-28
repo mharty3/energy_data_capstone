@@ -63,6 +63,7 @@ The initial motivation for the project was to fulfil the capstone project requir
 
 
 🔲 Transform and Load Data into BQ DW
+
     ✅ Hourly Energy Demand Data - US EIA
 
     🔲 Hourly Historical Weather Data - US NOAA
@@ -70,6 +71,7 @@ The initial motivation for the project was to fulfil the capstone project requir
     🔲 Weather Forecast Data - US NO
 
 🔲 Perform additional transformations as needed in the DW with dbt to create analytics layer
+
     ✅ Hourly Energy Demand Data - US EIA
 
     🔲 Hourly Historical Weather Data - US NOAA
