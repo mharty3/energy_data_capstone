@@ -61,8 +61,8 @@ fig.add_traces(
 
 fig['data'][1]['line']['color']='#ef476f'
 fig['data'][1]['line']['width']=5
-fig['data'][0]['line']['color']='#ffd166'
-fig['data'][0]['line']['width']=2
+    fig['data'][0]['line']['color']='#06d6a0'
+    fig['data'][0]['line']['width']=2
 
 fig['data'][1]['showlegend']=True
 fig['data'][1]['name']='Actual Demand'
