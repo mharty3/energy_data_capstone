@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+    - name: staging
+      database: data-eng-zoomcamp-339102
+      schema: energy_data
+
+      tables:
+        - name: demand_metadata_native
+        - name: demand_data_native
