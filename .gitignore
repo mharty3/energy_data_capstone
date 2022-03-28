@@ -12,4 +12,5 @@
 *.csv
 .ipynb_checkpoints/
 *.bin
-.streamlit/
+
+secrets.toml

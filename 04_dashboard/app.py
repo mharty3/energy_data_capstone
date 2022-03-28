@@ -65,7 +65,7 @@ fig['data'][0]['line']['color']='#ffd166'
 fig['data'][0]['line']['width']=2
 
 fig['data'][1]['showlegend']=True
-fig['data'][1]['name']='Historical Demand'
+fig['data'][1]['name']='Actual Demand'
 fig['data'][0]['showlegend']=True
 fig['data'][0]['name']='EIA Demand Forecast'
 
