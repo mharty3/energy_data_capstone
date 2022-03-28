@@ -2,6 +2,8 @@
 
 This is the repo for my capstone project for the Data Engineering Zoomcamp from Data Talks Club. All of my course work and notes for the zoomcamp are in [this other repo](https://github.com/mharty3/data_engineering_zoomcamp_2022).
 
+(Link to live dashboard)[https://share.streamlit.io/mharty3/energy_data_exploration/04_dashboard/app.py]
+
 ## Objective
 
 This project will create the necessary data engineering infrastructure to evaluate trends in electricty demand in Colorado.
@@ -49,14 +51,31 @@ The initial motivation for the project was to fulfil the capstone project requir
 
 ✅ Create GCS Bucket with Terraform to serve as the data lake
 
-🔲 Create a Big Query instance with Terraform to serve as the data warehouse
+✅ Create a Big Query instance with Terraform to serve as the data warehouse
 
 🔲 Ingest raw data into the data lake with Airflow on a proper schedule
 
+    ✅ Hourly Energy Demand Data - US EIA
+
+    🔲 Hourly Historical Weather Data - US NOAA
+
+    🔲 Weather Forecast Data - US NOA
+
+
 🔲 Transform and Load Data into BQ DW
+    ✅ Hourly Energy Demand Data - US EIA
+
+    🔲 Hourly Historical Weather Data - US NOAA
+
+    🔲 Weather Forecast Data - US NO
 
 🔲 Perform additional transformations as needed in the DW with dbt to create analytics layer
+    ✅ Hourly Energy Demand Data - US EIA
 
-🔲 Create visualizations in Google Data Studio
+    🔲 Hourly Historical Weather Data - US NOAA
+
+    🔲 Weather Forecast Data - US NO
+
+✅ Create visualizations in Streamlit
 
 🔲 Train machine learning model to predict energy demand and compare to EIA demand forecast
