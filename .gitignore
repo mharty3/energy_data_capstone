@@ -12,3 +12,4 @@
 *.csv
 .ipynb_checkpoints/
 *.bin
+.streamlit/
