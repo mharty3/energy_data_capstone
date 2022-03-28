@@ -37,7 +37,9 @@ def run_query(query):
 TODAY = date.today()
 TOMORROW = TODAY + timedelta(2)
 WEEK_PRIOR = TODAY - timedelta(7)
-start_date, end_date = st.sidebar.date_input('data start date', value=(WEEK_PRIOR, TOMORROW))
+with st.form('date_picker'):
+    start_date, end_date = st.date_input('Select Data Date Range', value=(WEEK_PRIOR, TOMORROW))
+    submitted = st.form_submit_button("Update")
 
 
 historical_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
@@ -54,7 +56,7 @@ fig = px.line(
 )
 
 fig.add_traces(
-    list(px.line(historical_demand, x='timestamp', y='value').select_traces())
+    list(px.line(historical_demand, x='timestamp', y='value', labels='Actual_Demand (megawatthours)').select_traces())
     )
 
 fig['data'][1]['line']['color']='#ef476f'
