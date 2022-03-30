@@ -7,6 +7,7 @@ from google.cloud import bigquery
 import pandas as pd
 import pandas_gbq
 import plotly.express as px
+from plotly.subplots import make_subplots
 import streamlit as st
 
 # https://docs.streamlit.io/knowledge-base/tutorials/databases/bigquery#enable-the-bigquery-api
@@ -35,18 +36,29 @@ def run_query(query):
     return pd.read_gbq(query, project_id=PROJECT_ID, credentials=credentials)
 
 
-def plot_demand_time_series(forecast_demand, actual_demand):
-    fig = px.line(
+def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
+
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
+
+    fig.add_traces(
+        list(px.line(
             forecast_demand, 
             x='timestamp', 
             y='value',
             title="Actual and Forecasted Electrical Demand, Xcel Energy, CO",
             labels={'value': 'Demand (megawatthours)'}
-
+            )
+            .select_traces()
+        )
     )
 
     fig.add_traces(
-        list(px.line(actual_demand, x='timestamp', y='value', labels='Actual_Demand (megawatthours)').select_traces())
+        list(px.line(actual_demand, x='timestamp', y='value', labels={'value': 'Actual_Demand (megawatthours)'}).select_traces())
+        )
+
+    fig.add_trace(
+        list(px.scatter(weather_2022, x='DATE', y='temperature_degC').select_traces())[0],
+        row=2, col=1
         )
 
     fig['data'][1]['line']['color']='#ef476f'
@@ -72,9 +84,10 @@ def main():
 
     actual_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
     forecast_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
+    
+    weather_2022 = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.2022_weather_station_native` WHERE date(DATE) BETWEEN date('{start_date}') and date('{end_date}')")
 
-
-    fig = plot_demand_time_series(forecast_demand, actual_demand)
+    fig = plot_demand_time_series(forecast_demand, actual_demand, weather_2022)
     st.plotly_chart(fig, use_container_width=True)
 
 if __name__ == '__main__':
