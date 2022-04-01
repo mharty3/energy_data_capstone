@@ -85,10 +85,26 @@ def main():
         submitted = st.form_submit_button("Update")
 
 
-    actual_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
-    forecast_demand = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` WHERE date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')")
+    actual_demand = run_query(f"""SELECT * 
+                                  FROM 
+                                    `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` 
+                                  WHERE 
+                                    date(timestamp) BETWEEN date('{start_date}') and date('{end_date}') 
+                                  ORDER BY timestamp""")
+
+    forecast_demand = run_query(f"""SELECT * 
+                                    FROM 
+                                      `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` 
+                                    WHERE 
+                                      date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')
+                                    ORDER BY timestamp""")
     
-    weather_2022 = run_query(f"SELECT * FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.2022_weather_station_native` WHERE date(DATE) BETWEEN date('{start_date}') and date('{end_date}')")
+    weather_2022 = run_query(f"""SELECT * 
+                               FROM 
+                                 `{PROJECT_ID}.{BIGQUERY_DATASET}.2022_weather_station_native` 
+                               WHERE 
+                                 date(DATE) BETWEEN date('{start_date}') and date('{end_date}')
+                               ORDER BY DATE""")
 
     fig = plot_demand_time_series(forecast_demand, actual_demand, weather_2022)
     st.plotly_chart(fig, use_container_width=True)
