@@ -71,6 +71,9 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
     fig['data'][0]['showlegend']=True
     fig['data'][0]['name']='EIA Demand Forecast'
 
+    fig['data'][2]['showlegend']=True
+    fig['data'][2]['name']='Denver Airport Actual Temperature'
+
     return fig
 
 def main():
