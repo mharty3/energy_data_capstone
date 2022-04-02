@@ -18,9 +18,10 @@ pip install python-dotenv pygrib
 
 then activate the environment: `conda activate energy`, and run `jupyter notebook`.
 
-## EIA API Key
-To access the data from the EIA API, you will need to [register for your own API key](https://www.eia.gov/opendata/register.php) for free. When they email you the key, place it in a file called `.env` located in this directory and be sure to add that file to your .gitignore so you don't commit it to your repo. The file should look like this:
+## API Keys
+To access the data from the EIA API and the Open Weather Map API, you will need to register for your own API key [with the EIA](https://www.eia.gov/opendata/register.php) and [OWM](https://home.openweathermap.org/users/sign_up) for free. When they email you the key, place it in a file called `.env` located in this directory and be sure to add that file to your .gitignore so you don't commit it to your repo. The file should look like this:
 
 ```
 EIA_KEY=your_eia_api_key
+OWM_KEY=your_owm_api_key
 ```
