@@ -22,8 +22,8 @@ EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = 'energy_data'
 
-LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
-REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
+LOCAL_DATASET_FILE_SUFFIX= "{{ logical_date.strftime(\'%Y-%m-%d-%H\') }}"
+REMOTE_DATASET_FILE_SUFFIX = "{{ logical_date.strftime(\'%Y-%m-%d\') }}" 
 
 # EIA series ID's that will be downloaded by this DAG
 SERIES_LIST = [

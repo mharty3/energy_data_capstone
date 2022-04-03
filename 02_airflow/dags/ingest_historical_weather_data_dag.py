@@ -16,9 +16,9 @@ BUCKET = os.environ.get("GCP_GCS_BUCKET")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = 'energy_data'
 
-LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
-REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
-YEAR = "{{ execution_date.strftime(\'%Y\') }}"
+LOCAL_DATASET_FILE_SUFFIX= "{{ logical_date.strftime(\'%Y-%m-%d-%H\') }}"
+REMOTE_DATASET_FILE_SUFFIX = "{{ logical_date.strftime(\'%Y-%m-%d\') }}" 
+YEAR = "{{ logical_date.strftime(\'%Y\') }}"
 
 # NOAA ISD Station IDs whose historical data will be downloaded by this DAG
 STATION_IDS = ['72565003017']

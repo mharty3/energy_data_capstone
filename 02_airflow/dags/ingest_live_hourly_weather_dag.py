@@ -18,7 +18,7 @@ OWM_API_KEY = os.environ.get("OWM_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
 BIGQUERY_DATASET = 'energy_data'
-DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
+DATASET_FILE_SUFFIX = "{{ logical_date.strftime(\'%Y-%m-%d-%H\') }}"
 YEAR = "{{ execution_date.strftime(\'%Y\') }}"
 
 # lat lon of the location that weather data will be downladed from Open Weather Map
