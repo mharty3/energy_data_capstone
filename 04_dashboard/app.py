@@ -57,7 +57,7 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
         )
 
     fig.add_trace(
-        list(px.scatter(weather_2022, x='DATE', y='temperature_degC').select_traces())[0],
+        list(px.scatter(weather_2022, x='observation_time_UTC', y='temp_F').select_traces())[0],
         row=2, col=1
         )
 
@@ -67,12 +67,12 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
     fig['data'][0]['line']['width']=2
 
     fig['data'][1]['showlegend']=True
-    fig['data'][1]['name']='Actual Demand'
+    fig['data'][1]['name']='Actual Demand (MWh)'
     fig['data'][0]['showlegend']=True
-    fig['data'][0]['name']='EIA Demand Forecast'
+    fig['data'][0]['name']='EIA Demand Forecast (MWh)'
 
     fig['data'][2]['showlegend']=True
-    fig['data'][2]['name']='Denver Airport Actual Temperature'
+    fig['data'][2]['name']='Denver Airport Actual Temperature (F)'
 
     return fig
 
@@ -101,10 +101,10 @@ def main():
     
     weather_2022 = run_query(f"""SELECT * 
                                FROM 
-                                 `{PROJECT_ID}.{BIGQUERY_DATASET}.2022_weather_station_native` 
+                                 `{PROJECT_ID}.{BIGQUERY_DATASET}.recorded_temperature` 
                                WHERE 
-                                 date(DATE) BETWEEN date('{start_date}') and date('{end_date}')
-                               ORDER BY DATE""")
+                                 observation_time_UTC BETWEEN date('{start_date}') and date('{end_date}')
+                               ORDER BY observation_time_UTC""")
 
     fig = plot_demand_time_series(forecast_demand, actual_demand, weather_2022)
     st.plotly_chart(fig, use_container_width=True)
