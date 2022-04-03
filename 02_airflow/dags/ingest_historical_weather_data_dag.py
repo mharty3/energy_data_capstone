@@ -20,6 +20,8 @@ LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
 REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
 YEAR = "{{ execution_date.strftime(\'%Y\') }}"
 
+# NOAA ISD Station IDs whose historical data will be downloaded by this DAG
+STATION_IDS = ['72565003017']
 
 def extract_historical_weather_data(csv):
     station_data = pd.read_csv(csv)
@@ -44,7 +46,6 @@ default_args = {
     "retries": 1,
 }
 
-station_ids = ['72565003017']
 
 with DAG(
     dag_id="historical_weather_dag",
@@ -57,7 +58,7 @@ with DAG(
     tags=['dtc-de', 'weather'],
 ) as dag:
     with TaskGroup(group_id='download_and_extract') as dl_and_extract_tg:
-        for station_id in station_ids: 
+        for station_id in STATION_IDS: 
 
             download_task = BashOperator(
                         task_id=f"download_weather_{station_id}_task",

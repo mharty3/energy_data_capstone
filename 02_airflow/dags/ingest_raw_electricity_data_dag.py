@@ -25,6 +25,11 @@ BIGQUERY_DATASET = 'energy_data'
 LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
 REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
 
+# EIA series ID's that will be downloaded by this DAG
+SERIES_LIST = [
+    'EBA.PSCO-ALL.D.H', # Electrical Demand Public Service Company of Colorado in UTC
+    'EBA.PSCO-ALL.DF.H' # Day-ahead demand forecast for Public Service Company of Colorado (PSCO), hourly - UTC time
+]
 
 def download_energy_demand_json(series_id, outfile):
     url = 'https://api.eia.gov/series/'
@@ -86,10 +91,6 @@ default_args = {
 }
 
 
-series_list = [
-    'EBA.PSCO-ALL.D.H', # Electrical Demand Public Service Company of Colorado in UTC
-    'EBA.PSCO-ALL.DF.H' # Day-ahead demand forecast for Public Service Company of Colorado (PSCO), hourly - UTC time
-]
 
 with DAG(
     dag_id="raw_electricity_ingestion_dag",
@@ -101,7 +102,7 @@ with DAG(
     tags=['dtc-de', 'eia'],
 ) as dag:
     with TaskGroup(group_id='download_and_extract') as dl_and_extract_tg:
-        for series_id in series_list:
+        for series_id in SERIES_LIST:
             local_file_suffix = f'{series_id}_{LOCAL_DATASET_FILE_SUFFIX}'
             remote_file_suffix= f'{series_id}_{REMOTE_DATASET_FILE_SUFFIX}'
 

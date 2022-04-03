@@ -1,7 +1,6 @@
 import os
 import json
 import logging
-import decimal
 import requests
 from datetime import datetime
 import pandas as pd
@@ -21,6 +20,11 @@ AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 BIGQUERY_DATASET = 'energy_data'
 DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
 YEAR = "{{ execution_date.strftime(\'%Y\') }}"
+
+# lat lon of the location that weather data will be downladed from Open Weather Map
+# right now the DAG only downloads one location (DIA). This may need to be parameterized better later.
+LAT = 39.847
+LON = -104.656
 
 
 def download_current_weather_data(lat, lon, outfile):
@@ -74,8 +78,7 @@ default_args = {
     "retries": 1,
 }
 
-lat = 39.847
-lon = -104.656
+
 
 with DAG(
     dag_id="current_weather_owm_dag",
@@ -91,8 +94,8 @@ with DAG(
         task_id=f"download_dataset_task",
         python_callable=download_current_weather_data,
         op_kwargs={
-            "lat": lat,
-            "lon": lon,
+            "lat": LAT,
+            "lon": LON,
             "outfile": f"{AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.json"
         },
     )
@@ -102,7 +105,7 @@ with DAG(
         python_callable=upload_to_gcs,
         op_kwargs={
             "bucket": BUCKET,
-            "object_name": f"raw/owm/{lat}_{lon}/{DATASET_FILE_SUFFIX}.json",
+            "object_name": f"raw/owm/{LAT}_{LON}/{DATASET_FILE_SUFFIX}.json",
             "local_file": f"{AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.json",
         }
     )
@@ -120,7 +123,7 @@ with DAG(
         python_callable = upload_to_gcs,
         op_kwargs={
             'bucket': BUCKET,
-            'object_name': f"staged/owm/{lat}_{lon}/{DATASET_FILE_SUFFIX}.parquet",
+            'object_name': f"staged/owm/{LAT}_{LON}/{DATASET_FILE_SUFFIX}.parquet",
             'local_file': f"{AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.parquet"
         }
     )
@@ -133,7 +136,7 @@ with DAG(
     load_to_bq_task = GCSToBigQueryOperator(
         task_id='load_to_bq_task',
         bucket=BUCKET,
-        source_objects=f"staged/owm/{lat}_{lon}/{DATASET_FILE_SUFFIX}.parquet",
+        source_objects=f"staged/owm/{LAT}_{LON}/{DATASET_FILE_SUFFIX}.parquet",
         destination_project_dataset_table=f'{BIGQUERY_DATASET}.hourly_updated_weather',
         source_format='parquet',
         write_disposition='WRITE_APPEND',
