@@ -148,8 +148,8 @@ with DAG(
                 python_callable = upload_multiple_files_to_gcs,
                 op_kwargs={
                     'bucket': BUCKET,
-                    'object_names': [f"staged/eia/data/{series_id}_{remote_file_suffix}.parquet",
-                                    f"staged/eia/metadata/{series_id}_{remote_file_suffix}.parquet"],
+                    'object_names': [f"staged/eia/data/{series_id}.parquet",
+                                    f"staged/eia/metadata/{series_id}.parquet"],
                     'local_files': [f"{AIRFLOW_HOME}/data_{local_file_suffix}.parquet", 
                                     f"{AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet"]
                 }
