@@ -1,29 +1,26 @@
 import os
 import json
 import logging
-import decimal
 import requests
-from datetime import date, datetime
+from datetime import datetime
 import pandas as pd
+
 import pyarrow as pa
 import pyarrow.parquet as pq
 
 from airflow import DAG
-from airflow.utils.dates import days_ago
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
-
-from google.cloud import storage
 from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator, BigQueryInsertJobOperator
-# import pyarrow.csv as pv
-# import pyarrow.parquet as pq
+
+from gcloud_helpers import upload_to_gcs, upload_multiple_files_to_gcs
 
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
-BIGQUERY_DATASET = 'energy_data'
 EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
+BIGQUERY_DATASET = 'energy_data'
 
 LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
 REMOTE_DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d\') }}" 
@@ -80,79 +77,6 @@ def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
 
     logging.info('files converted to parquet')
 
-
-
-def download_from_GCS(bucket, object, local_file_dest):
-    """Downloads a blob from the bucket."""
-    # The ID of your GCS bucket
-    # bucket = "your-bucket-name"
-
-    # The ID of your GCS object
-    # source_blob_name = "storage-object-name"
-
-    # The path to which the file should be downloaded
-    # destination_file_name = "local/path/to/file"
-
-    storage_client = storage.Client()
-
-    bucket = storage_client.bucket(bucket)
-
-    # Construct a client side representation of a blob.
-    # Note `Bucket.blob` differs from `Bucket.get_blob` as it doesn't retrieve
-    # any content from Google Cloud Storage. As we don't need additional data,
-    # using `Bucket.blob` is preferred here.
-    blob = bucket.blob()
-    blob.download_to_filename(local_file_dest)
-
-    logging.info(
-        "Downloaded storage object {} from bucket {} to local file {}.".format(
-            object, bucket, local_file_dest
-        )
-    )
-
-
-def upload_to_gcs(bucket, object_name, local_file):
-    """
-    Ref: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python
-    :param bucket: GCS bucket name
-    :param object_name: target path & file-name
-    :param local_file: source path & file-name
-    :return:
-    """
-    # WORKAROUND to prevent timeout for files > 6 MB on 800 kbps upload speed.
-    # (Ref: https://github.com/googleapis/python-storage/issues/74)
-    storage.blob._MAX_MULTIPART_SIZE = 5 * 1024 * 1024  # 5 MB
-    storage.blob._DEFAULT_CHUNKSIZE = 5 * 1024 * 1024  # 5 MB
-    # End of Workaround
-
-    client = storage.Client()
-    bucket = client.bucket(bucket)
-
-    blob = bucket.blob(object_name)
-    blob.upload_from_filename(local_file)
-
-
-def upload_multiple_files_to_gcs(bucket, object_names, local_files):
-    """
-    Ref: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python
-    :param bucket: GCS bucket name
-    :param object_name: target path & file-name
-    :param local_file: source path & file-name
-    :return:
-    """
-    # WORKAROUND to prevent timeout for files > 6 MB on 800 kbps upload speed.
-    # (Ref: https://github.com/googleapis/python-storage/issues/74)
-    storage.blob._MAX_MULTIPART_SIZE = 5 * 1024 * 1024  # 5 MB
-    storage.blob._DEFAULT_CHUNKSIZE = 5 * 1024 * 1024  # 5 MB
-
-    if not type(object_names) == list and not type(local_files) == list:
-        raise TypeError('object_names and local_files must be lists')
-    if not len(object_names) == len(local_files):
-        raise ValueError('object_names and local_files must be the same length')
-
-    for remote, local in zip(object_names, local_files):
-        upload_to_gcs(bucket, remote, local)
-        logging.info(f'uploaded {local} to {bucket}/{remote}')
 
 
 default_args = {

@@ -3,36 +3,25 @@ import json
 import logging
 import decimal
 import requests
-from datetime import date, datetime
+from datetime import datetime
 import pandas as pd
-import numpy as np
-import pyarrow as pa
-import pyarrow.parquet as pq
 
 from airflow import DAG
-from airflow.utils.dates import days_ago
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.utils.task_group import TaskGroup
-
-from google.cloud import storage
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
-from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateExternalTableOperator, BigQueryInsertJobOperator
-# import pyarrow.csv as pv
-# import pyarrow.parquet as pq
 
 from gcloud_helpers import upload_to_gcs
 
-
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
-BIGQUERY_DATASET = 'energy_data'
 OWM_API_KEY = os.environ.get("OWM_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
+BIGQUERY_DATASET = 'energy_data'
 DATASET_FILE_SUFFIX = "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
-
 YEAR = "{{ execution_date.strftime(\'%Y\') }}"
+
 
 def download_current_weather_data(lat, lon, outfile):
     url = 'https://api.openweathermap.org/data/2.5/weather?'
