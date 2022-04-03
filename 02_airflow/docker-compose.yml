@@ -62,6 +62,7 @@ x-airflow-common:
     GCP_PROJECT_ID: 'data-eng-zoomcamp-339102'
     GCP_GCS_BUCKET: 'energy_project_bucket_data-eng-zoomcamp-339102'
     EIA_API_KEY: '${EIA_KEY}'
+    OWM_API_KEY: '${OWM_KEY}'
 
   volumes:
     - ./dags:/opt/airflow/dags

@@ -26,7 +26,6 @@ from gcloud_helpers import upload_to_gcs
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 BUCKET = os.environ.get("GCP_GCS_BUCKET")
 BIGQUERY_DATASET = 'energy_data'
-EIA_API_KEY = os.environ.get("EIA_API_KEY")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 
 LOCAL_DATASET_FILE_SUFFIX= "{{ execution_date.strftime(\'%Y-%m-%d-%H\') }}"
@@ -64,6 +63,7 @@ with DAG(
     schedule_interval="@daily",
     default_args=default_args,
     start_date=datetime(2015, 1, 1),
+    end_date=(datetime(2022, 4, 5)),
     catchup=True,
     max_active_runs=1,
     tags=['dtc-de', 'weather'],
@@ -138,5 +138,7 @@ with DAG(
             }
         },
     )
+
+    
 
     dl_and_extract_tg >> gcs_to_bq_ext_task >> create_native_bq_table_task
