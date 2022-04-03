@@ -32,27 +32,33 @@ SERIES_LIST = [
 ]
 
 def download_energy_demand_json(series_id, outfile):
+    """
+    Request data for an EIA series and save the result locally as a json file 
+    """
+
     url = 'https://api.eia.gov/series/'
-    
     params = {'api_key': EIA_API_KEY,
              'series_id': series_id,
              }
 
-    r = requests.get(url, params)
     logging.info("requesting data from EIA API")
+    r = requests.get(url, params)
 
     if r.status_code == 200:
         logging.info(r.status_code)
-
         with open(outfile, 'w') as f:
             json.dump(r.json(), f)
         logging.info(f'file written to {outfile}')
-    
+
     else:
-        logging.info(r.status_code)
+        error_message = f'EIA API returned value {r.status_code}'
+        raise ValueError(error_message)
 
 
 def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
+    """
+    Extract data and metadata of an EIA series json file and store the results locally as a parquet file
+    """
 
     with open(f"{AIRFLOW_HOME}/{local_file_name}") as f:
         j = json.load(f)
@@ -69,6 +75,10 @@ def extract_energy_demand_data(series_id, local_file_name, local_file_suffix):
               )
     data_df.columns = data_df.columns.str.replace('.', '_')
 
+    # the schema must be defined for the data_df to store the table as parquet.
+    # Pandas/pyarrow can not automatically define the schema. The value field
+    # is mostly integers, but does have missing values. Automatically defining
+    # the schema will assign integer which cannot contain missing values
     fields = [
     ('timestamp', pa.timestamp(unit='ns')),
     ('value', pa.float64()),
@@ -89,8 +99,6 @@ default_args = {
     "depends_on_past": False,
     "retries": 1,
 }
-
-
 
 with DAG(
     dag_id="raw_electricity_ingestion_dag",
@@ -147,7 +155,7 @@ with DAG(
                 }
             )
 
-
+            # delete all of the files downloaded to the worker
             cleanup_task = BashOperator(
                 task_id=f"cleanup_{series_id}_task",
                 bash_command=f'rm {AIRFLOW_HOME}/{local_file_suffix}.json {AIRFLOW_HOME}/data_{local_file_suffix}.parquet {AIRFLOW_HOME}/metadata_{local_file_suffix}.parquet'

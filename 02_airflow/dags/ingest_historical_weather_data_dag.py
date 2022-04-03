@@ -23,9 +23,15 @@ YEAR = "{{ logical_date.strftime(\'%Y\') }}"
 # NOAA ISD Station IDs whose historical data will be downloaded by this DAG
 STATION_IDS = ['72565003017']
 
+
 def extract_historical_weather_data(csv):
+    """
+    Extract weather data from NOAA ISD csv and save the result locally in a parquet file
+    """
+
     station_data = pd.read_csv(csv)
 
+    # temp and qc value are stored in the same field and must be separated. same for dew point
     station_data[['temperature_degC', 'temperature_QC']] = station_data['TMP'].str.split(',', expand=True)
     station_data[['dew_point_degC', 'dew_point_QC']] = station_data['DEW'].str.split(',', expand=True)
 
@@ -93,6 +99,7 @@ with DAG(
                     }
                 )
 
+            # delete all of the files downloaded to the worker
             cleanup_task = BashOperator(
                 task_id=f"cleanup_{station_id}_task",
                 bash_command=f'rm {AIRFLOW_HOME}/{station_id}.csv {AIRFLOW_HOME}/{station_id}.parquet'

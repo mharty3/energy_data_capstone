@@ -28,6 +28,9 @@ LON = -104.656
 
 
 def download_current_weather_data(lat, lon, outfile):
+    """
+    Request weather data for a location from the OWM API and store the result locally as a json file
+    """
     url = 'https://api.openweathermap.org/data/2.5/weather?'
 
     params = {'appid': OWM_API_KEY,
@@ -47,12 +50,14 @@ def download_current_weather_data(lat, lon, outfile):
         logging.info(f'file written to {outfile}')
     
     else:
-        logging.info(r.status_code) 
-        message = f'OpenWeatherMap API returned value {r.status_code}'
-        raise ValueError(message)
+        error_message = f'OpenWeatherMap API returned value {r.status_code}'
+        raise ValueError(error_message)
 
 
 def extract_weather_data(file_suffix):
+    """
+    Extract data from an OWM weather observation json file and store the results locally as a parquet file
+    """
 
     with open(f"{AIRFLOW_HOME}/{file_suffix}.json") as f:
         j = json.load(f)
@@ -128,6 +133,7 @@ with DAG(
         }
     )
 
+    # delete all of the files downloaded to the worker
     cleanup_task = BashOperator(
         task_id=f"cleanup_task",
         bash_command=f'rm {AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.json {AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.parquet'
