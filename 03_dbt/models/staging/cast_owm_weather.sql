@@ -1,6 +1,8 @@
-{{ config(materialized='table') }}
+{{ config(materialized='view') }}
 
-select 
+select
+    lat,
+    lon, 
     temp as temp_C,
     ROUND( temp * (9/5) + 32, 1) as temp_F,
     DATETIME(timestamp(timestamp), 'UTC') as observation_time_UTC,

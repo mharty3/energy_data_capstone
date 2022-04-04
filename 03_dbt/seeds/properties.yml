@@ -1,0 +1,8 @@
+version: 2
+
+seeds:
+  - name: isd_stations
+    config:
+      column_types:
+        USAF: string
+        WBAN: string
