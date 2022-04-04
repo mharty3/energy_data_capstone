@@ -1,6 +1,7 @@
 import os
 from datetime import date, timedelta
 
+from info import info_text, note
 from google.oauth2 import service_account
 from google.cloud import bigquery
 
@@ -13,7 +14,7 @@ import streamlit as st
 # https://docs.streamlit.io/knowledge-base/tutorials/databases/bigquery#enable-the-bigquery-api
 # https://pandas-gbq.readthedocs.io/en/latest/howto/authentication.html
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 
 # Create API client.
 credentials = service_account.Credentials.from_service_account_info(
@@ -43,7 +44,7 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
     fig.add_traces(
         list(px.line(
             forecast_demand, 
-            x='timestamp', 
+            x='timestamp_MTN', 
             y='value',
             title="Actual and Forecasted Electrical Demand, Xcel Energy, CO",
             labels={'value': 'Demand (megawatthours)'}
@@ -53,11 +54,11 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
     )
 
     fig.add_traces(
-        list(px.line(actual_demand, x='timestamp', y='value', labels={'value': 'Actual_Demand (megawatthours)'}).select_traces())
+        list(px.line(actual_demand, x='timestamp_MTN', y='value', labels={'value': 'Actual_Demand (megawatthours)'}).select_traces())
         )
 
     fig.add_trace(
-        list(px.scatter(weather_2022, x='observation_time_UTC', y='temp_F').select_traces())[0],
+        list(px.scatter(weather_2022, x='observation_time_MTN', y='temp_F').select_traces())[0],
         row=2, col=1
         )
 
@@ -81,7 +82,7 @@ def main():
     TOMORROW = TODAY + timedelta(2)
     WEEK_PRIOR = TODAY - timedelta(7)
     with st.form('date_picker'):
-        start_date, end_date = st.date_input('Select Data Date Range', value=(WEEK_PRIOR, TOMORROW))
+        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 1), max_value=TOMORROW, value=(WEEK_PRIOR, TOMORROW))
         submitted = st.form_submit_button("Update")
 
 
@@ -89,25 +90,33 @@ def main():
                                   FROM 
                                     `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_historical` 
                                   WHERE 
-                                    date(timestamp) BETWEEN date('{start_date}') and date('{end_date}') 
-                                  ORDER BY timestamp""")
+                                    date(timestamp_MTN) BETWEEN date('{start_date}') and date('{end_date}') 
+                                  ORDER BY timestamp_MTN""")
 
     forecast_demand = run_query(f"""SELECT * 
                                     FROM 
                                       `{PROJECT_ID}.{BIGQUERY_DATASET}.fact_eia_demand_forecast` 
                                     WHERE 
-                                      date(timestamp) BETWEEN date('{start_date}') and date('{end_date}')
-                                    ORDER BY timestamp""")
+                                      date(timestamp_MTN) BETWEEN date('{start_date}') and date('{end_date}')
+                                    ORDER BY timestamp_MTN""")
     
     weather_2022 = run_query(f"""SELECT * 
                                FROM 
                                  `{PROJECT_ID}.{BIGQUERY_DATASET}.recorded_temperature` 
                                WHERE 
-                                 observation_time_UTC BETWEEN date('{start_date}') and date('{end_date}')
-                               ORDER BY observation_time_UTC""")
+                                 observation_time_MTN BETWEEN date('{start_date}') and date('{end_date}')
+                               ORDER BY observation_time_MTN""")
 
     fig = plot_demand_time_series(forecast_demand, actual_demand, weather_2022)
+    fig.update_layout(height=700)
     st.plotly_chart(fig, use_container_width=True)
 
 if __name__ == '__main__':
+  
+    st.title('⚡ Energy Demand and Temperature for Xcel Energy in CO ⚡')
+    st.sidebar.write(info_text)
+    with st.sidebar.expander('Note on missing data between March 29 and April 2, 2022:'):
+      st.write(note)
+
     main()
+
