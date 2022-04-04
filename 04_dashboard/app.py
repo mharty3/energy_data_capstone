@@ -82,7 +82,7 @@ def main():
     TOMORROW = TODAY + timedelta(2)
     WEEK_PRIOR = TODAY - timedelta(7)
     with st.form('date_picker'):
-        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 2), max_value=TOMORROW, value=(WEEK_PRIOR, TOMORROW))
+        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 4), max_value=TOMORROW, value=(WEEK_PRIOR, TOMORROW))
         submitted = st.form_submit_button("Update")
 
 
