@@ -1,11 +1,13 @@
+--https://discourse.getdbt.com/t/unioning-identically-structured-data-sources/921
 {{ config(materialized='table') }}
 
-{% set models =  ['cast_isd_weather_station_data', 'cast_owm_weather'] %}
+{% set models =  ['isd', 'owm'] %}
 
 {% for model in models %}
   select 
       *,
-  from {{ ref(model) }}
+      '{{ model }}' as source
+  from {{ ref('cast_'~model~'_weather') }}
 {% if not loop.last -%} union all {%- endif %}
 {% endfor %} 
 

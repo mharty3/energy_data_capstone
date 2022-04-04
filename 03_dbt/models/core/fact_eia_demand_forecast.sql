@@ -3,7 +3,8 @@
 select 
 
 d.series_id,
-d.timestamp,
+d.timestamp as timestamp_UTC,
+DATETIME(d.timestamp, 'America/Denver') as timestamp_MTN,
 d.value,
 md.units,
 md.name,
