@@ -82,7 +82,7 @@ def main():
     TOMORROW = TODAY + timedelta(2)
     WEEK_PRIOR = TODAY - timedelta(7)
     with st.form('date_picker'):
-        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 1), max_value=TOMORROW, value=(WEEK_PRIOR, TOMORROW))
+        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 2), max_value=TOMORROW, value=(WEEK_PRIOR, TOMORROW))
         submitted = st.form_submit_button("Update")
 
 
@@ -112,7 +112,7 @@ def main():
     st.plotly_chart(fig, use_container_width=True)
 
 if __name__ == '__main__':
-  
+
     st.title('⚡ Energy Demand and Temperature for Xcel Energy in CO ⚡')
     st.sidebar.write(info_text)
     with st.sidebar.expander('Note on missing data between March 29 and April 2, 2022:'):
