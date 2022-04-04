@@ -46,7 +46,7 @@ def plot_demand_time_series(forecast_demand, actual_demand, weather_2022):
             forecast_demand, 
             x='timestamp_MTN', 
             y='value',
-            title="Actual and Forecasted Electrical Demand, Xcel Energy, CO",
+            title="Actual and Forecasted Electrical Demand, Xcel Energy, Colorado",
             labels={'value': 'Demand (megawatthours)'}
             )
             .select_traces()
