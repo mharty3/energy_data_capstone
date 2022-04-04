@@ -1,3 +1,6 @@
+{{ config(materialized='view') }}
+
+-- https://discourse.getdbt.com/t/unioning-identically-structured-data-sources/921
 {% set years =  ['2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'] %}
 
 {% for year in years %}
