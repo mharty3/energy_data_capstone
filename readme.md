@@ -6,9 +6,11 @@ This is the repo for my capstone project for the Data Engineering Zoomcamp from 
 
 ## Objective
 
-This project creates the necessary data engineering infrastructure to evaluate trends in electricty demand in Colorado and develop an hourly day-ahead demand forecast. Accurately forecasting energy demand is critical for electrical grid operators. Without significant power storage options, electricity must be used at the time it is generated. Balancing authorities must have an accurate power demand forecast in order to successfully plan generation and interchange over the upcoming day(s).
+This project creates the necessary data engineering infrastructure to evaluate trends in electricty demand in Colorado and develop an hourly day-ahead demand forecast. Accurately forecasting energy demand is critical for electrical grid operators. 
 
-Loading historical demand data and historical temperature records will allow data scientists to develop reliable demand forecasts. I also load the existing demand forecast from the EIA for comparison.
+Without significant power storage options, electricity must be used at the time it is generated. Balancing authorities must have an accurate power demand forecast in order to successfully plan generation and interchange over the upcoming days.
+
+Loading historical demand data and historical temperature records into a database/data warehouse will provide data scientists with a reliable source of data to develop demand forecasts.
 
 A data engineering project is more than an ad hoc analysis. It is building a robust system for data collection, ingestion, and transformation in order to create stable, evergreen datasets. Data scientists and analysts will rely on these datasets to be accurate, high quality, and up-to-date, so they can use them for business or research decisions.
 
