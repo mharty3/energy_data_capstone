@@ -68,7 +68,7 @@ Now we can see that the infrastructure has been created on GCP. For example, the
 7. Git clone this repo using ssh
 
     ```bash
-    git@github.com:mharty3/energy_data_capstone.git
+    git clone git@github.com:mharty3/energy_data_capstone.git
     ```
 
 8. Run the bash setup script and the below commands to install `oh-my-fish` shell and install the theme that I like. 
