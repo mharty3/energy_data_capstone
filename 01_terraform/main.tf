@@ -11,7 +11,7 @@ terraform {
 provider "google" {
   project = var.project
   region = var.region
-  // credentials = file(var.credentials)  # Use this if you do not want to set env-var GOOGLE_APPLICATION_CREDENTIALS
+  # credentials =  # Use this if you do not want to set env-var GOOGLE_APPLICATION_CREDENTIALS
 }
 
 # Data Lake Bucket
@@ -46,4 +46,30 @@ resource "google_bigquery_dataset" "dataset" {
   dataset_id = var.BQ_DATASET
   project    = var.project
   location   = var.region
+}
+
+
+# A single Compute Engine instance
+resource "google_compute_instance" "default" {
+ name         = "energy-data-proj-vm"
+ machine_type = "e2-standard-4"
+ zone         = var.zone
+
+ boot_disk {
+   initialize_params {
+     image = "ubuntu-1804-lts"
+     size  = "30"
+   }
+ }
+
+ network_interface {
+   network = "default"
+    access_config {
+    # Include this section to give the VM an external IP address
+  }
+ }
+
+  metadata = {
+    ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_file)}"
+  }
 }
