@@ -49,8 +49,7 @@ eval "$(cat ~/.bashrc | tail -n +10)" # A hack because source .bashrc doesn't wo
 echo "docker-compose version..."
 docker-compose --version
 
-echo "installing fish"
-sudo apt get -y install fish
+sudo apt -y install fish
 echo '' >> ~/.bashrc
 echo 'exec fish' >> ~/.bashrc
 
