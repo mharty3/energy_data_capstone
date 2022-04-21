@@ -12,7 +12,7 @@ echo hello $USER
 if [ -f ~/setup_result.txt ]; 
 then
 
-echo "vm has been initialized"
+cat ~/setup_result.txt
 
 else
 sudo apt-get update
