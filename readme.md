@@ -2,7 +2,7 @@
 
 This is the repo for my capstone project for the Data Engineering Zoomcamp from Data Talks Club. All of my course work and notes for the zoomcamp are in [this other repo](https://github.com/mharty3/data_engineering_zoomcamp_2022).
 
-[Link to live dashboard](https://share.streamlit.io/mharty3/energy_data_exploration/04_dashboard/app.py) (Note: I ran out of Google Cloud Credits so right now there is an error connecting the app to the data warehouse. I'm working on a solution)
+[Link to live dashboard](https://share.streamlit.io/mharty3/energy_data_exploration/04_dashboard/app.py) (Note: I ran out of Google Cloud Credits, so right now there is an error connecting the app to the data warehouse. I'm working on a solution)
 
 ## Objective
 
