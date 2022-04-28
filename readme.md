@@ -2,11 +2,11 @@
 
 This is the repo for my capstone project for the Data Engineering Zoomcamp from Data Talks Club. All of my course work and notes for the zoomcamp are in [this other repo](https://github.com/mharty3/data_engineering_zoomcamp_2022).
 
-[Link to live dashboard](https://share.streamlit.io/mharty3/energy_data_exploration/04_dashboard/app.py) (Note: I ran out of Google Cloud Credits, so right now there is an error connecting the app to the data warehouse. I'm working on a solution)
+[Link to live dashboard](https://share.streamlit.io/mharty3/energy_data_exploration/04_dashboard/app.py) (Note: I ran out of Google Cloud Credits, so right now there is an error connecting the app to the data warehouse. I'm working on a solution. For now, keep scrolling to see a screenshot.)
 
 ## Objective
 
-This project creates the necessary data engineering infrastructure to evaluate trends in electricity demand in Colorado and develop an hourly day-ahead demand forecast. Accurately forecasting energy demand is critical for electrical grid operators. 
+This project creates the necessary data engineering infrastructure to evaluate trends in electricity demand in Colorado. This data will allow a data scientist (me in the future) to develop an hourly day-ahead demand forecast. Accurately forecasting energy demand is critical for electrical grid operators. 
 
 Without significant power storage options, electricity must be used at the time it is generated. Balancing authorities must have an accurate power demand forecast in order to successfully plan generation and interchange over the upcoming days.
 
