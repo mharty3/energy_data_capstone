@@ -54,6 +54,8 @@ Now we can see that the infrastructure has been created on GCP. For example, the
     For windows you will want to add the same text to the windows ssh config located in 
     
     `/mnt/c/Users/<username>/.ssh/config`
+    
+    Double check the path to the private key, you may need to copy it to the windows side from WSL.
 
 6. Now connect to the vm from the terminal with `ssh energy-vm`
 
