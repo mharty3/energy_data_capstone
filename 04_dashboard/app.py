@@ -22,7 +22,7 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "data-eng-zoomcamp-339102")
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "de-zoomcamp-347002")
 BIGQUERY_DATASET = 'energy_data_prod'
 
 
