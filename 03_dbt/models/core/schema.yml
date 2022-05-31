@@ -2,7 +2,7 @@ version: 2
 
 sources:
     - name: staging
-      database: data-eng-zoomcamp-339102
+      database: de-zoomcamp-347002
       schema: energy_data
 
       tables:
