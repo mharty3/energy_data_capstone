@@ -16,9 +16,9 @@ The data is stored in a data warehouse using Google Big Query with the idea that
 
 
 note ="""
-Historical weather data prior to April 2nd is being pulled from the NOAA Integrated Surface Database. 
+Historical weather data prior to May 30 is being pulled from the NOAA Integrated Surface Database. 
 It has hourly weather observation data dating back to 1901, however it is usually updated on a few days delay. When their database is updated with recent data, 
 the missing data on the dashboard will be backfilled. 
 
-From April 2nd onward, weather data is being pulled from a different, live updating source and should be kept up to date.
+From May 30 onward, weather data is being pulled from a different, live updating source and should be kept up to date.
 """

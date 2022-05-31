@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     st.title('⚡ Energy Demand and Temperature for Xcel Energy in CO ⚡')
     st.sidebar.write(info_text)
-    with st.sidebar.expander('Note on missing data between March 29 and April 2, 2022:'):
+    with st.sidebar.expander('Note on missing data between May 20 and May 30, 2022:'):
       st.write(note)
 
     main()

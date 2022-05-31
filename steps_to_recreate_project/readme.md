@@ -73,6 +73,13 @@ Now we can see that the infrastructure has been created on GCP. For example, the
     git clone git@github.com:mharty3/energy_data_capstone.git
     ```
 
+8. Set up git identity: 
+    
+    ```bash
+    git config --global user.email <email>
+    git config --global user.name <username>
+    ```
+
 8. Run the bash setup script and the below commands to install `oh-my-fish` shell and install the theme that I like. 
     
     ```bash
@@ -88,3 +95,57 @@ Now we can see that the infrastructure has been created on GCP. For example, the
 * https://cloud.google.com/community/tutorials/getting-started-on-gcp-with-terraform
 
 * https://stackoverflow.com/questions/62638916/how-to-provide-image-name-in-gcp-terraform-script
+
+## Set up airflow
+
+1. Create a file in `02_airflow` called `.env`. Add the following variables:
+
+    ```
+    AIRFLOW_UID=50000
+    EIA_KEY=<api key for the eia>
+    OWM_KEY=<api key for open weather map>
+    ```
+
+2. Update the values for the variables `GCP_PROJECT_ID` and `GCP_GCS_BUCKET` in `docker-compose.yml` with the new values for the new project id
+
+3. Copy the google credentials json file created above (it was saved in `~/.config/gcloud` on the local machine) to the vm using scp. Note this command is run in the terminal on the local machine, and `<energy-vm>` should be whatever the remote host is named in the `~/.ssh/config` file.
+
+    ```bash
+    scp <local path to credentials> <energy-vm>:~/.google/credentials/google_credentials.json 
+    ```
+
+
+
+4. cd into into `02_airflow` and run:
+    
+    ```
+    docker-compose up airflow-init
+    docker-compose up
+    ```
+
+5. Forward the port `8080` from the VM to the local machine to access the web interface at `http://localhost:8080/home`
+
+
+6. Before activating the dags, it is convenient to set the `ingest_historical_weather_data_dag` to a yearly interval for a quicker backfill. Once it has caught up to the previous year, adjust the `end-date` to several days into the future, and change the interval back to daily. There is typically a lag of several days before observations are added to the historical data source, so this will allow the dag to pull the updated observations as they are added to the file. 
+
+7. Activate the dags, and the runs will begin populating the data lake and data warehouse.
+
+## dbt
+
+1. Sign into dbt cloud
+
+2. Update BigQuery Connection Credentials: Click on the top left hamburger, and go to Account Settings. Select the energy_data project, edit the connection information by uploading the credentials JSON file from google cloud. 
+
+3. Update the schema with the new database name: From the top left, hamburger menu, click Develop. Then navigate to `03_dbt/models/core/schmea.yml`. Update the database under sourced to have the new database name (eg. de-zoomcamp-347002)
+
+4. In the hamburger menu, go to Jobs. Click the Build Fact Tables job, and click run now. This will build the dbt models in the data warehouse.
+
+## Streamlit Dashboard
+
+1. Update the variable `PROJECT_ID` in `04_dashboard/app.py` to the project id of the GCP project
+
+2. Follow the instructions [here](https://docs.streamlit.io/knowledge-base/tutorials/databases/bigquery) to create a `.streamlit/secrets.toml` file from the json credentials file. This will allow streamlit to connect to the data warehouse
+
+3. Create a new app on streamlit sharing, connect to the repo location, and paste in the secrets.toml file. 
+
+4. If necessary, update the `note` in `04_dashboard/info.py` and the expander header in `app.py` to reflect the dates of the missing data that will be backfilled.
