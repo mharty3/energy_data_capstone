@@ -31,7 +31,7 @@ variable "BQ_DATASET" {
 variable "ssh_public_key_file" {
   description = "Path to the public ssh key that will be used to connect to the Compute Instance created by terraform"
   type = string
-  default = "~/.ssh/gcp2.pub"
+  default = "~/.ssh/gcp3.pub"
 }
 
 variable "ssh_user" {

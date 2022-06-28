@@ -22,7 +22,7 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = bigquery.Client(credentials=credentials)
 
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "data-eng-zoomcamp-339102")
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "mlops-zoomcamp-354700")
 BIGQUERY_DATASET = 'energy_data_prod'
 
 
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     st.title('⚡ Energy Demand and Temperature for Xcel Energy in CO ⚡')
     st.sidebar.write(info_text)
-    with st.sidebar.expander('Note on missing data between March 29 and April 2, 2022:'):
+    with st.sidebar.expander('Note on missing data between May 20 and May 30, 2022:'):
       st.write(note)
 
     main()
