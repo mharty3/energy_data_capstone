@@ -90,6 +90,7 @@ Now we can see that the infrastructure has been created on GCP. For example, the
      bash energy_data_capstone/01_terraform/vm_init.sh
      curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
      omf install agnoster
+     conda intit fish
      ```
 
 9. Disconnect and re-connect from the VM via SSH and it will be all set up! Remember that if you shut down and restart the VM, the IP will probably change and you will need to update your local ssh config files accordingly.
