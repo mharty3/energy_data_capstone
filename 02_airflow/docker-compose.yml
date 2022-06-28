@@ -59,8 +59,8 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     GOOGLE_APPLICATION_CREDENTIALS: /.google/credentials/google_credentials.json
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/.google/credentials/google_credentials.json'
-    GCP_PROJECT_ID: 'de-zoomcamp-347002'
-    GCP_GCS_BUCKET: 'energy_project_bucket_de-zoomcamp-347002'
+    GCP_PROJECT_ID: 'mlops-zoomcamp-354700'
+    GCP_GCS_BUCKET: 'energy_project_bucket_mlops-zoomcamp-354700'
     EIA_API_KEY: '${EIA_KEY}'
     OWM_API_KEY: '${OWM_KEY}'
 
