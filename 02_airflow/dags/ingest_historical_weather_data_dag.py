@@ -58,7 +58,7 @@ with DAG(
     schedule_interval="@daily",
     default_args=default_args,
     start_date=datetime(2015, 1, 1),
-    end_date=(datetime(2022, 6, 7)),
+    end_date=(datetime(2022, 7, 3)),
     catchup=True,
     max_active_runs=1,
     tags=['dtc-de', 'weather'],
