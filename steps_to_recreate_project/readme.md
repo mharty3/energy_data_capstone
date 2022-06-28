@@ -26,7 +26,11 @@ This section will walk you through how to use the existing terraform configurati
     ssh-keygen -t rsa -f ~/.ssh/<name_of_credential> -C <user-name> -b 2048
     ```
 
-5. Use terraform to provision the infrastructure. Terraform will prompt you to enter the project id from GCP.
+5. Use terraform to provision the infrastructure. Terraform will prompt you to enter the project id from GCP. If you have used terraform in this directory in a different project, you may need to create a new terraform workspace.
+
+   ```bash
+   terraform workspace new <workspace-name>
+   ```
 
     ```bash
     cd 01_terraform
@@ -86,6 +90,7 @@ Now we can see that the infrastructure has been created on GCP. For example, the
      bash energy_data_capstone/01_terraform/vm_init.sh
      curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
      omf install agnoster
+     conda intit fish
      ```
 
 9. Disconnect and re-connect from the VM via SSH and it will be all set up! Remember that if you shut down and restart the VM, the IP will probably change and you will need to update your local ssh config files accordingly.
