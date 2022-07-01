@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<dwml version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://graphical.weather.gov/xml/DWMLgen/schema/DWML.xsd">
+  <head>
+    <product srsName="WGS 1984" concise-name="time-series" operational-mode="official">
+      <title>NOAA's National Weather Service Forecast Data</title>
+      <field>meteorological</field>
+      <category>forecast</category>
+      <creation-date refresh-frequency="PT1H">2022-07-01T03:44:31Z</creation-date>
+    </product>
+    <source>
+      <more-information>https://graphical.weather.gov/xml/</more-information>
+      <production-center>Meteorological Development Laboratory<sub-center>Product Generation Branch</sub-center></production-center>
+      <disclaimer>http://www.nws.noaa.gov/disclaimer.html</disclaimer>
+      <credit>https://www.weather.gov/</credit>
+      <credit-logo>https://www.weather.gov/logorequest</credit-logo>
+      <feedback>https://www.weather.gov/contact</feedback>
+    </source>
+  </head>
+  <data>
+    <location>
+      <location-key>point1</location-key>
+      <point latitude="39.56" longitude="-104.85"/>
+    </location>
+    <moreWeatherInformation applicable-location="point1">https://forecast-v3.weather.gov/point/39.56,-104.85</moreWeatherInformation>
+    <time-layout time-coordinate="local" summarization="none">
+      <layout-key>k-p3h-n39-1</layout-key>
+      <start-valid-time>2022-07-01T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T03:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T09:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T15:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-01T21:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T03:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T09:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T15:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-02T21:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T03:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T09:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T15:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-03T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-04T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-04T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-04T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-04T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-05T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-05T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-05T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-05T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-06T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-06T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-06T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-06T18:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-07T00:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-07T06:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-07T12:00:00-06:00</start-valid-time>
+      <start-valid-time>2022-07-07T18:00:00-06:00</start-valid-time>
+    </time-layout>
+    <parameters applicable-location="point1">
+      <temperature type="hourly" units="Fahrenheit" time-layout="k-p3h-n39-1">
+        <name>Temperature</name>
+        <value>62</value>
+        <value>59</value>
+        <value>58</value>
+        <value>67</value>
+        <value>77</value>
+        <value>76</value>
+        <value>72</value>
+        <value>69</value>
+        <value>64</value>
+        <value>61</value>
+        <value>59</value>
+        <value>70</value>
+        <value>81</value>
+        <value>85</value>
+        <value>80</value>
+        <value>72</value>
+        <value>67</value>
+        <value>64</value>
+        <value>61</value>
+        <value>72</value>
+        <value>83</value>
+        <value>85</value>
+        <value>80</value>
+        <value>68</value>
+        <value>62</value>
+        <value>85</value>
+        <value>83</value>
+        <value>68</value>
+        <value>62</value>
+        <value>86</value>
+        <value>85</value>
+        <value>69</value>
+        <value>62</value>
+        <value>84</value>
+        <value>81</value>
+        <value>68</value>
+        <value>62</value>
+        <value>84</value>
+        <value>84</value>
+      </temperature>
+    </parameters>
+  </data>
+</dwml>
