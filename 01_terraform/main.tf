@@ -73,3 +73,35 @@ resource "google_compute_instance" "default" {
     ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_file)}"
   }
 }
+
+
+module "postgres" {
+
+  project = var.project
+  region  = var.region
+  name    = var.instance_name
+  db_name = var.db_name
+
+  engine       = var.postgres_version
+  machine_type = var.machine_type
+
+  public_ip = "disabled"
+  private_ip = "enabled"
+  private_network = "default"
+
+
+  deletion_protection = true
+
+  # These together will construct the master_user privileges, i.e.
+  # 'master_user_name'@'master_user_host' IDENTIFIED BY 'master_user_password'.
+  # These should typically be set as the environment variable TF_VAR_master_user_password, etc.
+  # so you don't check these into source control."
+  master_user_password = var.master_user_password
+
+  master_user_name = var.master_user_name
+  master_user_host = "%"
+
+  # Wait for the vpc connection to complete
+  dependencies = [google_service_networking_connection.private_vpc_connection.network]
+
+}
