@@ -75,33 +75,91 @@ resource "google_compute_instance" "default" {
 }
 
 
-module "postgres" {
+resource "google_storage_bucket" "mlflow-runs" {
 
-  project = var.project
-  region  = var.region
-  name    = var.instance_name
-  db_name = var.db_name
+  name          = "mlflow-runs-${var.project}" # Concatenating DL bucket & Project name for unique naming
+  location      = var.region
 
-  engine       = var.postgres_version
-  machine_type = var.machine_type
+  # Optional, but recommended settings:
+  storage_class = var.storage_class
+  uniform_bucket_level_access = true
 
-  public_ip = "disabled"
-  private_ip = "enabled"
-  private_network = "default"
+  versioning {
+    enabled     = true
+  }
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 30  // days
+    }
+  }
+
+  force_destroy = true
+} 
 
 
-  deletion_protection = true
 
-  # These together will construct the master_user privileges, i.e.
-  # 'master_user_name'@'master_user_host' IDENTIFIED BY 'master_user_password'.
-  # These should typically be set as the environment variable TF_VAR_master_user_password, etc.
-  # so you don't check these into source control."
-  master_user_password = var.master_user_password
+# resource "google_compute_network" "default" {
+#   provider = google-beta
 
-  master_user_name = var.master_user_name
-  master_user_host = "%"
+#   name = "default"
+# }
 
-  # Wait for the vpc connection to complete
-  dependencies = [google_service_networking_connection.private_vpc_connection.network]
+# resource "google_sql_database_instance" "main" {
+#   name             = "main-instance"
+#   database_version = "POSTGRES_14"
+#   region           = "us-central1"
+#   # depends_on = [google_service_networking_connection.private_vpc_connection]
 
-}
+#   settings {
+#     # Second-generation instance tiers are based on the machine
+#     # type. See argument reference below.
+#     tier = var.machine_type
+#     ip_configuration {
+#       ipv4_enabled = false
+#       private_network = google_compute_network.default.id
+#     }
+#   }
+  
+
+
+# }
+
+
+# module "sql-db_postgresql" {
+#   # https://registry.terraform.io/modules/GoogleCloudPlatform/sql-db/google/latest/submodules/postgresql
+#   source  = "GoogleCloudPlatform/sql-db/google//modules/postgresql"
+#   version = "11.0.0"
+
+#   project_id = var.project
+#   region  = var.region
+#   zone = var.zone
+#   name   = var.instance_name
+#   db_name = var.db_name
+
+#   database_version      = var.postgres_version
+#   tier = var.machine_type
+
+
+
+#   ip_configuration = {
+#                       authorized_networks = [],
+#                       ipv4_enabled        = false,
+#                       private_network     = "default"
+#                       require_ssl         = false
+#                       allocated_ip_range = ""
+#                           }
+
+
+#   deletion_protection = true
+
+#   # These together will construct the master_user privileges, i.e.
+#   # 'master_user_name'@'master_user_host' IDENTIFIED BY 'master_user_password'.
+#   # These should typically be set as the environment variable TF_VAR_master_user_password, etc.
+#   # so you don't check these into source control."
+
+
+# }
