@@ -65,13 +65,15 @@ variable "machine_type" {
   default     = "db-custom-1-3840"
 }
 
-variable "master_user_name" {
+variable "user_name" {
   description = "The username for mlflow-postgres the default user credentials, i.e. 'master_user_name'@'master_user_host' IDENTIFIED BY 'master_user_password'. This should typically be set as the environment variable TF_VAR_master_user_name so you don't check it into source control."
   type        = string
+  default = "mlflow_user"
 }
 
-variable "master_user_password" {
+variable "user_password" {
   description = "The password for ml-flow postgres the default user credentials, i.e. 'master_user_name'@'master_user_host' IDENTIFIED BY 'master_user_password'. This should typically be set as the environment variable TF_VAR_master_user_password so you don't check it into source control."
   type        = string
+  default = "mlflow_pass"
 }
 
