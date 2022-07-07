@@ -154,3 +154,20 @@ Now we can see that the infrastructure has been created on GCP. For example, the
 3. Create a new app on streamlit sharing, connect to the repo location, and paste in the secrets.toml file. 
 
 4. If necessary, update the `note` in `04_dashboard/info.py` and the expander header in `app.py` to reflect the dates of the missing data that will be backfilled.
+
+
+## Mlflow
+The instructions are modified from this [link](https://kargarisaac.github.io/blog/mlops/jupyter/2022/06/15/MLFlow-on-GCP.html).
+
+1. Set up a GCP Postgres database on the default private network
+2. Create the file `05_model_training/mlflow_docker/.env` which contains the following variables which match the database created in the previous step and the mlflow_runs bucket created by terraform:
+  - DB_USER
+  - DB_PASSWORD
+  - DB_PRIVATE_IP
+  - DB_NAME
+  - BUCKET_NAME
+3. On the remote machine, cd into `05_model_training/mlflow_docker` and run the following command:
+    ```bash
+    docker-compose up -d
+    ``` 
+    This will start the mlflow tracking server which will store runs and experiments in the postgres db and artifacts in the gcp bucket.

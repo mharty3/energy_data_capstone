@@ -14,3 +14,4 @@
 *.bin
 *.xml
 secrets.toml
+mlflow.db
