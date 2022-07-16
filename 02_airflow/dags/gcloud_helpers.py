@@ -24,6 +24,20 @@ def upload_to_gcs(bucket, object_name, local_file):
     blob.upload_from_filename(local_file)
 
 
+def download_from_gcs(bucket, object_name, local_file_name):
+    """
+    Ref: https://cloud.google.com/storage/docs/downloading-objects#storage-download-object-python
+    :param bucket: GCS bucket name
+    :param object_name: target path & file-name
+    :param local_file_name: source path & file-name
+    :return:
+    """
+    client = storage.Client()
+    bucket = client.bucket(bucket)
+    blob = bucket.blob(object_name)
+    blob.download_to_filename(local_file_name)
+
+
 def upload_multiple_files_to_gcs(bucket, object_names, local_files):
     """
     Ref: https://cloud.google.com/storage/docs/uploading-objects#storage-upload-object-python

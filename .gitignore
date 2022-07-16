@@ -12,5 +12,6 @@
 *.csv
 .ipynb_checkpoints/
 *.bin
-
+*.xml
 secrets.toml
+mlflow.db
