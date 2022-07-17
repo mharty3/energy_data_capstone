@@ -4,6 +4,8 @@ import logging
 import requests
 from datetime import datetime
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -150,7 +152,7 @@ with DAG(
         python_callable = upload_to_gcs,
         op_kwargs={
             'bucket': BUCKET,
-            'object_name': f"staged/owm/{LAT}_{LON}/{DATASET_FILE_SUFFIX}.parquet",
+            'object_name': f"staged/live_weather/{LAT}_{LON}/{DATASET_FILE_SUFFIX}.parquet",
             'local_file': f"{AIRFLOW_HOME}/{DATASET_FILE_SUFFIX}.parquet"
         }
     )
