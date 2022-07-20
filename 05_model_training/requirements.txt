@@ -2,6 +2,7 @@ prophet
 jupyterlab
 mlflow
 google-cloud-BigQuery
+google-cloud-storage
 db-dtypes
 pandas-gbq
 seaborn
