@@ -7,3 +7,4 @@ db-dtypes
 pandas-gbq
 seaborn
 scikit-learn==1.1
+probscale
