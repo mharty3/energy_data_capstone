@@ -1,0 +1,107 @@
+from google.cloud import bigquery
+import probscale
+import numpy as np
+import pandas as pd
+import calendar
+import hvplot.pandas
+import holoviews as hv
+from datetime import date, timedelta
+import streamlit as st
+
+st.set_page_config(layout='wide')
+st.title("Model Monitoring Dashboard")
+
+# Query the data from BigQuery.
+
+
+# model selection
+q = f"""SELECT DISTINCT(model_version) 
+       FROM `mlops-zoomcamp-354700.energy_data_prod.ml_model_metrics` 
+       """
+model_options = pd.read_gbq(q, dialect='standard')['model_version'].tolist()
+model_selection = st.sidebar.selectbox("Select Model", model_options)
+
+
+# date range 
+TODAY = date.today()
+TOMORROW = TODAY + timedelta(2)
+TWO_WEEK_PRIOR = TODAY - timedelta(14)
+with st.sidebar.form('date_picker'):
+        start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 4), max_value=TOMORROW, value=(TWO_WEEK_PRIOR, TOMORROW))
+        submitted = st.form_submit_button("Update")
+
+client = bigquery.Client()
+q = f"""SELECT * 
+       FROM `mlops-zoomcamp-354700.energy_data_prod.ml_model_metrics`
+       WHERE hours_from_pred_start <= 24 and 
+             date(energy_timestamp_mtn) BETWEEN date('{start_date}') and date('{end_date}') 
+       """
+metrics = pd.read_gbq(q, project_id='mlops-zoomcamp-354700')
+
+# display key metrics
+st.write('## Hourly Energy Demand Prediction Metrics')
+col1, col2, col3 = st.columns(3)
+col1.metric('Mean Error', f"{round(metrics['energy_error'].mean(), 2)} MW")
+col2.metric('Mean Absolute Error', f"{round(metrics['energy_error_abs'].mean(), 2)} MW")
+col3.metric('Mean Absolute Percentage Error', f"{round(metrics['energy_error_abs_pct'].mean() * 100, 2)}%")
+
+st.write('## Hourly Temperature Forecast Metrics')
+col1, col2, col3 = st.columns(3)
+col1.metric('Mean Error', f"{round(metrics['temp_f_error'].mean(), 2)} degF")
+col2.metric('Mean Absolute Error', f"{round(metrics['temp_f_error_abs'].mean(), 2)} degF")
+col3.metric('Mean Absolute Percentage Error', f"{round(metrics['temp_f_error_abs_pct'].mean() * 100, 2)}%")
+
+st.markdown("""---""") 
+st.write('## Hourly Monitoring Plots')
+# plot actual vs predicted scatter plot
+st.write('### Actual vs Predicted')
+e = metrics.hvplot.scatter(x='energy_demand', y='predicted_energy_demand', label='Energy Demand')
+t = metrics.hvplot.scatter(x='temp_F', y='temp_f_forecast', label='Temp (F)')
+
+st.bokeh_chart(
+    hv.render(e + t)
+)
+
+# plot actual vs predicted over time
+st.write('### Actual vs Predicted Over Time')
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_demand', label='actual')
+predicted = metrics.hvplot(x='energy_timestamp_mtn', y='predicted_energy_demand', label='predicted', title='Energy - Actual vs Predicted Over Time')
+e = actual * predicted
+
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_F', label='actual')
+predicted = metrics.hvplot(x='energy_timestamp_mtn', y='temp_f_forecast', label='predicted', title='Temp (F) - Actual vs Predicted Over Time')
+t = actual * predicted
+
+st.bokeh_chart(
+    hv.render(e + t)
+)
+
+# plot error over time
+st.write('### Error Over Time')
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error', label='Energy Error (actual - predicted) Over Time')
+e = actual * hv.HLine(0).opts(color='gray', line_width=1)
+
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_f_error', label='Temp (F) Error (actual - predicted) Over Time')
+t = actual * hv.HLine(0).opts(color='gray', line_width=1)
+st.bokeh_chart(
+    hv.render(e + t)
+)
+
+# plot absolute percentage error over time
+st.write('### Absolute Percentage Error Over Time')
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error_abs_pct', label='Energy Absolute Percentage Error')
+e = actual
+
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_f_error_abs_pct', label='Temp (F) Absolute Percentage Error')
+t = actual
+st.bokeh_chart(
+    hv.render(e + t)
+)
+
+# plot error distribution
+st.write('### Error Distribution')
+e = metrics.hvplot.hist('energy_error', label='Energy Error Distribution')
+t = metrics.hvplot.hist('temp_f_error', label='Temp (F) Error Distribution')
+st.bokeh_chart(
+    hv.render(e + t)
+)

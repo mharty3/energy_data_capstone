@@ -1,0 +1,7 @@
+google-cloud-bigquery
+streamlit
+pandas
+pandas_gbq
+hvplot
+probscale
+click==7.1.2
