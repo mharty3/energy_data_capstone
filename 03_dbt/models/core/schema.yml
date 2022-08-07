@@ -17,3 +17,8 @@ sources:
         - name: 2020_weather_station_native
         - name: 2021_weather_station_native
         - name: 2022_weather_station_native
+        - name: energy_demand_forecasts
+
+      
+      
+      
