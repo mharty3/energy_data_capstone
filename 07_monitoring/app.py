@@ -1,3 +1,4 @@
+from google.oauth2 import service_account
 from google.cloud import bigquery
 import probscale
 import numpy as np
@@ -12,13 +13,31 @@ st.set_page_config(layout='wide')
 st.title("Model Monitoring Dashboard")
 
 # Query the data from BigQuery.
+# Create API client.
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"]
+)
+client = bigquery.Client(credentials=credentials)
+
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "mlops-zoomcamp-354700")
+BIGQUERY_DATASET = 'energy_data_prod'
+
+# Perform query.
+# Uses st.experimental_memo to only rerun when the query changes or after 10 min.
+@st.experimental_memo(ttl=600)
+def run_query(query):
+    # query_job = client.query(query)
+    # rows_raw = query_job.result()
+    # # Convert to list of dicts. Required for st.experimental_memo to hash the return value.
+    # rows = [dict(row) for row in rows_raw]
+    return pd.read_gbq(query, project_id=PROJECT_ID, credentials=credentials)
 
 
 # model selection
 q = f"""SELECT DISTINCT(model_version) 
        FROM `mlops-zoomcamp-354700.energy_data_prod.ml_model_metrics` 
        """
-model_options = pd.read_gbq(q, dialect='standard')['model_version'].tolist()
+model_options = run_query(q)['model_version'].tolist()
 model_selection = st.sidebar.selectbox("Select Model", model_options)
 
 
@@ -30,13 +49,12 @@ with st.sidebar.form('date_picker'):
         start_date, end_date = st.date_input('Select a date range, then click "Update"', min_value=date(2015,7, 4), max_value=TOMORROW, value=(TWO_WEEK_PRIOR, TOMORROW))
         submitted = st.form_submit_button("Update")
 
-client = bigquery.Client()
 q = f"""SELECT * 
        FROM `mlops-zoomcamp-354700.energy_data_prod.ml_model_metrics`
        WHERE hours_from_pred_start <= 24 and 
              date(energy_timestamp_mtn) BETWEEN date('{start_date}') and date('{end_date}') 
        """
-metrics = pd.read_gbq(q, project_id='mlops-zoomcamp-354700')
+metrics = run_query(q)
 
 # display key metrics
 st.write('## Hourly Energy Demand Prediction Metrics')
