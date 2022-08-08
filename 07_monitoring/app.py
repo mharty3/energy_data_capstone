@@ -11,7 +11,6 @@ import os
 import streamlit as st
 
 st.set_page_config(layout='wide')
-st.title("Model Monitoring Dashboard")
 
 # Query the data from BigQuery.
 # Create API client.
@@ -57,6 +56,9 @@ q = f"""SELECT *
        """
 metrics = run_query(q)
 
+st.title("Model Monitoring Dashboard")
+st.write(f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}. Use the sidebar to select a different date range.")
+
 # display key metrics
 st.write('## Hourly Energy Demand Prediction Metrics')
 col1, col2, col3 = st.columns(3)
@@ -74,7 +76,7 @@ st.markdown("""---""")
 st.write('## Hourly Monitoring Plots')
 # plot actual vs predicted scatter plot
 st.write('### Actual vs Predicted')
-e = metrics.hvplot.scatter(x='energy_demand', y='predicted_energy_demand', label='Energy Demand')
+e = metrics.hvplot.scatter(x='energy_demand (MW)', y='predicted_energy_demand', label='Energy Demand')
 t = metrics.hvplot.scatter(x='temp_F', y='temp_f_forecast', label='Temp (F)')
 
 st.bokeh_chart(
@@ -84,7 +86,7 @@ st.bokeh_chart(
 # plot actual vs predicted over time
 st.write('### Actual vs Predicted Over Time')
 actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_demand', label='actual')
-predicted = metrics.hvplot(x='energy_timestamp_mtn', y='predicted_energy_demand', label='predicted', title='Energy - Actual vs Predicted Over Time')
+predicted = metrics.hvplot(x='energy_timestamp_mtn', y='predicted_energy_demand', label='predicted', title='Energy Demand (MW) - Actual vs Predicted Over Time')
 e = actual * predicted
 
 actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_F', label='actual')
@@ -97,7 +99,7 @@ st.bokeh_chart(
 
 # plot error over time
 st.write('### Error Over Time')
-actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error', label='Energy Error (actual - predicted) Over Time')
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error', label='Energy Demand (MW) Error (actual - predicted) Over Time')
 e = actual * hv.HLine(0).opts(color='gray', line_width=1)
 
 actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_f_error', label='Temp (F) Error (actual - predicted) Over Time')
@@ -108,7 +110,7 @@ st.bokeh_chart(
 
 # plot absolute percentage error over time
 st.write('### Absolute Percentage Error Over Time')
-actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error_abs_pct', label='Energy Absolute Percentage Error')
+actual = metrics.hvplot(x='energy_timestamp_mtn', y='energy_error_abs_pct', label='Energy Demand (MW) Absolute Percentage Error')
 e = actual
 
 actual = metrics.hvplot(x='energy_timestamp_mtn', y='temp_f_error_abs_pct', label='Temp (F) Absolute Percentage Error')
@@ -119,7 +121,7 @@ st.bokeh_chart(
 
 # plot error distribution
 st.write('### Error Distribution')
-e = metrics.hvplot.hist('energy_error', label='Energy Error Distribution')
+e = metrics.hvplot.hist('energy_error', label='Energy Demand (MW) Error Distribution')
 t = metrics.hvplot.hist('temp_f_error', label='Temp (F) Error Distribution')
 st.bokeh_chart(
     hv.render(e + t)
