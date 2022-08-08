@@ -76,7 +76,7 @@ st.markdown("""---""")
 st.write('## Hourly Monitoring Plots')
 # plot actual vs predicted scatter plot
 st.write('### Actual vs Predicted')
-e = metrics.hvplot.scatter(x='energy_demand (MW)', y='predicted_energy_demand', label='Energy Demand')
+e = metrics.hvplot.scatter(x='energy_demand', y='predicted_energy_demand', label='Energy Demand (MW)')
 t = metrics.hvplot.scatter(x='temp_F', y='temp_f_forecast', label='Temp (F)')
 
 st.bokeh_chart(
