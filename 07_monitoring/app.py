@@ -57,7 +57,7 @@ q = f"""SELECT *
 metrics = run_query(q)
 
 st.title("Model Monitoring Dashboard")
-st.write(f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}. Use the sidebar to select a different date range.")
+st.write(f"Analyzing predictions between {start_date.strftime('%Y-%m-%d')} and {end_date.strftime('%Y-%m-%d')}.\n Use the sidebar to select a different date range.")
 
 # display key metrics
 st.write('## Hourly Energy Demand Prediction Metrics')
