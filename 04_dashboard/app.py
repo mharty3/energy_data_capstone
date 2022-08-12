@@ -109,7 +109,7 @@ def main():
                                         temp_f_forecast
                                   FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.energy_demand_forecasts` 
                                   WHERE model_version = '{MODEL_VERSION}'
-                                  """
+                                  """)
 
     
     weather_2022 = run_query(f"""SELECT * 
