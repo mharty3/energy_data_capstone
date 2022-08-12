@@ -107,7 +107,7 @@ def main():
                                         DATETIME(energy_timestamp_mtn, "America/Denver") as timestamp_MTN,
                                         predicted_energy_demand,
                                         temp_f_forecast
-                                  FROM `{PROJECT_ID}.{BIGQUERY_DATASET}.energy_demand_forecasts` 
+                                  FROM `{PROJECT_ID}.energy_data.energy_demand_forecasts` 
                                   WHERE model_version = '{MODEL_VERSION}'
                                   """)
 
