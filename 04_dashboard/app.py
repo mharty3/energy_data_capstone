@@ -58,7 +58,7 @@ def plot_demand_time_series(eia_forecast_demand, prod_model_demand, actual_deman
         list(px.line(actual_demand, x='timestamp_MTN', y='value', labels={'value': 'Actual_Demand (megawatthours)'}).select_traces())
         )
 
-    fig.add_traces(px.scatter(prod_model_demand, x='timestamp_MTN', y='predicted_energy_demand', labels={'value': 'Predicted_Demand (megawatthours)'}).select_traces())
+    fig.add_traces(px.line(prod_model_demand, x='timestamp_MTN', y='predicted_energy_demand', labels={'value': 'Predicted_Demand (megawatthours)'}).select_traces())
 
     fig.add_trace(
         list(px.scatter(weather_2022, x='observation_time_MTN', y='temp_F').select_traces())[0],
