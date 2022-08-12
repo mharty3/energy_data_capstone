@@ -119,7 +119,7 @@ def main():
                                  observation_time_MTN BETWEEN date('{start_date}') and date('{end_date}')
                                ORDER BY observation_time_MTN""")
 
-    fig = plot_demand_time_series(eia_forecast_demand, actual_demand, weather_2022)
+    fig = plot_demand_time_series(eia_forecast_demand, prod_model_demand, actual_demand, weather_2022)
     fig.update_layout(height=700)
     st.plotly_chart(fig, use_container_width=True)
 
