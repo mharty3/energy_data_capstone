@@ -2,8 +2,6 @@
 
 This is my capstone project for both the Data Engineering Zoomcamp and the MLOps Zoomcamp from Data Talks Club.  Course work and notes for the DE Zoomcamp are in [this other repo](https://github.com/mharty3/data_engineering_zoomcamp_2022).
 
-[Link to live dashboard](https://share.streamlit.io/mharty3/energy_data_capstone/04_dashboard/app.py)
-
 ## Objective
 With few exceptions, electricity must be generated at the same time it is needed. This creates a challenge for electrical grid operators who have to make a plan to generate the electricity their customers need each hour. Accurately forecasting energy demand is critical for grid operators so they can appropriately plan to meet the generation needs of their customers.
 
@@ -35,7 +33,7 @@ Once the data pipeline was running, I used concepts and tools from MLOps to buil
 Notebooks exploring each of these data sources can be found [here](00_data_source_exploration)
 
 * Electricity Demand and Generation - [EIA Open Data](https://www.eia.gov/opendata/)
-  * The United States Energy Information Agency (EIA) provides open access to hundreds of thousands of time series datasets via a REST API. The data is in the public domain, and requires [registraton and an API key](https://www.eia.gov/opendata/register.php).
+  * The United States Energy Information Administration (EIA) provides open access to hundreds of thousands of time series datasets via a REST API. The data is in the public domain, and requires [registraton and an API key](https://www.eia.gov/opendata/register.php).
 
 * Historical Weather Data - [NOAA Integrated Surface Data](https://registry.opendata.aws/noaa-isd/)
   * The United States National Oceanic and Atmospheric Administration (NOAA) maintins the Integrated Surface Database (ISD) with global hourly weather station observations from nearly 30,000 stations. The data is available in csv format in open AWS S3 bucket.
