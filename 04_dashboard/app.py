@@ -106,7 +106,7 @@ def main():
                                         ORDER BY timestamp_MTN""")
 
     prod_model_demand = run_query(f"""SELECT
-                                        DATETIME(energy_timestamp_mtn, "America/Denver") as energy_timestamp_mtn,
+                                        DATETIME(energy_timestamp_mtn, "America/Denver") as timestamp_MTN,
                                         predicted_energy_demand,
                                         temp_f_forecast,
                                         model_version,
