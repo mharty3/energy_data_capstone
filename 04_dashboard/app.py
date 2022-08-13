@@ -105,13 +105,21 @@ def main():
                                           date(timestamp_MTN) BETWEEN date('{start_date}') and date('{end_date}')
                                         ORDER BY timestamp_MTN""")
 
-    prod_model_demand = run_query(f"""SELECT 
-                                        DATETIME(energy_timestamp_mtn, "America/Denver") as timestamp_MTN,
+    prod_model_demand = run_query(f"""SELECT
+                                        DATETIME(energy_timestamp_mtn, "America/Denver") as energy_timestamp_mtn,
                                         predicted_energy_demand,
-                                        temp_f_forecast
-                                  FROM `{PROJECT_ID}.energy_data.energy_demand_forecasts` 
-                                  WHERE model_version = '{MODEL_VERSION}'
-                                  """)
+                                        temp_f_forecast,
+                                        model_version,
+        
+                                    FROM `{PROJECT_ID}.energy_data.energy_demand_forecasts`                              
+                                      WHERE DATETIME_DIFF(DATETIME(energy_timestamp_mtn, "America/Denver"), DATETIME(prediction_start_date, "America/Denver"), HOUR) < 24
+                                      and 
+                                      model_version = '{MODEL_VERSION}'
+                                      and 
+                                      DATETIME(energy_timestamp_mtn, "America/Denver") BETWEEN date('{start_date}') and date('{end_date}')
+                                      ORDER BY energy_timestamp_mtn"""
+                                      )                                        
+
 
     
     weather_2022 = run_query(f"""SELECT * 
