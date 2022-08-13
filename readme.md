@@ -12,9 +12,12 @@ This project utilizes Data Engineering and Machine Learning Operations (MLOps) c
 ### Data Engineering
 I applied data engineering and EtLT concepts from the modern data stack including workflow orchestration with Airflow, cloud data warehousing and data lake storage on Google Cloud, and data transformation with dbt. I used these concepts and tools to build a data pipeline that populates a Big Query data warehouse with the data a data scientist needs to make develop an hourly day-ahead demand forecast. 
 
+![](img/de_architecture.PNG)
+
 ### MLOps
 Once the data pipeline was running, I used concepts and tools from MLOps to build a system for developing, deploying, and monitoring machine learning models that predict hourly energy demand. I used experiment tracking and model registration with MLFlow, batch model deployment with Airflow, and model monitoring with dbt and Streamlit.
 
+![](img/mlops_architecture.PNG)
 
 
 
@@ -40,7 +43,7 @@ Notebooks exploring each of these data sources can be found [here](00_data_sourc
 * Live weather data - [Open Weather Map API](https://openweathermap.org/)
   * Live weather observation data for anywhere on the globe is available for free (with certain API call limits) via the Open Weather Map REST API.
 
-* Weather Forecast Data - [NOAA National Digigal Forcast Database](https://registry.opendata.aws/noaa-ndfd/)
+* Weather Forecast Data - [NOAA National Digital Forecast Database](https://registry.opendata.aws/noaa-ndfd/)
   * NOAA maintains the National Digital Forecast Database (NDFD) which is a suite of gridded forecasts of weather conditions for the United States. The data is available in gridded format in an open AWS S3 bucket or via XML from a REST API.
 
 ## Technologies and Tools
@@ -52,18 +55,18 @@ Notebooks exploring each of these data sources can be found [here](00_data_sourc
 - Data Lake - [**Google Cloud Storage**](https://cloud.google.com/storage)
 - Data Warehouse - [**BigQuery**](https://cloud.google.com/bigquery)
 - Post-Load Transformation - [**dbt**](https://www.getdbt.com)
-- Data Visualization/Dashboard - [**Streamlit**](https://streamlit.io/) and [**Plotly Express**](https://plotly.com/python/plotly-express/)
+- Data Visualization/Dashboard - [**Streamlit**](https://streamlit.io/) and [**Plotly Express**](https://plotly.com/python/plotly-express/) and [**hvplot**](https://hvplot.holoviz.org/)
 - Model Development, Experiment Tracking, and Registration - [**scikit-learn**](https://scikit-learn.org/) and [**MLflow**](https://www.mlflow.org/)
 - Model Deployment - Batch Deployment with [**Airflow**](https://airflow.apache.org)
 - Model Monitoring - [**dbt**](https://www.getdbt.com) and [**Streamlit**](https://streamlit.io/)
 
 
 
+## Data and Forecast Dashboard
+[Link](https://share.streamlit.io/mharty3/energy_data_capstone/04_dashboard/app.py)
 
-## Architecture
-![](img/Architecture.PNG)
+![](img/dashboard1.PNG)
 
-
-## Dashboard
-![](img/dashboard.PNG)
-
+## Monitoring Dashboard
+[Link](https://mharty3-energy-data-capstone-07-monitoringapp-o8dnn1.streamlitapp.com/)
+![](img/monitoring_dashboard_1.PNG)
