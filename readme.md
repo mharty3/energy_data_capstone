@@ -63,6 +63,8 @@ Notebooks exploring each of these data sources can be found [here](00_data_sourc
 ## Data and Forecast Dashboard
 [Link](https://share.streamlit.io/mharty3/energy_data_capstone/04_dashboard/app.py)
 
+Note: I am running low on free GCP credits, so by the time you read this, the apps may no longer work.
+
 ![](img/dashboard1.PNG)
 
 ## Monitoring Dashboard
