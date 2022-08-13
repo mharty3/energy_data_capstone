@@ -76,6 +76,8 @@ def plot_demand_time_series(eia_forecast_demand, prod_model_demand, actual_deman
     fig['data'][1]['name']='Actual Demand (MWh)'
     fig['data'][0]['showlegend']=True
     fig['data'][0]['name']='EIA Demand Forecast (MWh)'
+    fig['data'][2]['name']='Modeled Demand (MWh)'
+    fig['data'][2]['showlegend']=True
 
     fig['data'][2]['showlegend']=True
     fig['data'][2]['name']='Denver Airport Actual Temperature (F)'
